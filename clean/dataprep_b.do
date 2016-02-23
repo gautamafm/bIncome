@@ -4,15 +4,13 @@ using the individual-level dataset.  Two separate files are created: bankruptpeo
 */
 
 clear all
-set mem 600m
 set more off
+
+run clean/io
 
 
 global B wtrBank yrfile1 chapter bank_count asset_seize value_seize plan13_amt plan13_payperiod plan13_yrs plan13_mos plan13_wks plan13_done debt_totfiled debt_totremain statefiled
 global bweight bankruptweight86-96
-
-global root r:\bankrupt\psid
-global td smalldata
 
 	//reshape variables
 global widevars match cutoff state famsize hometype inc wt age sexofhead relhead employ hrwork educ headrace headinc mrstat heademp wifeemploy wifeinc numchild numadult rent rentmo mort mortmo mortpri wifelabor hvalue stamps stampsper foodhome_st foodhomeper_st fooddel_st fooddelper_st foodout_st foodoutper_st foodhome foodhomeper fooddel fooddelper foodout foodoutper foodtot foodouttot _m

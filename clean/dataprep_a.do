@@ -4,12 +4,10 @@ parred down year is then saved in the "smalldata" directory and spliced together
 */
 
 clear all
-set mem 500m
 set maxvar 20000
 set more off
 
-global root r:\bankrupt\psid
-global td smalldata
+run clean/io
 
 global B wrBank yrfile1 chapter bank_count asset_seize value_seize plan13_amt plan13_payperiod plan13_yrs plan13_mos plan13_wks plan13_done debt_totfiled debt_totremain stfiled
 global keeper match tf* state famsize hometype sexofhead headrace headlabor mrstat wt wifelabor numchild mort* rent* hvalue food* stamps*
