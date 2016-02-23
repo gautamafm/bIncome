@@ -84,12 +84,16 @@ rename ER30043 match1970
 rename ER30020 match1969
 rename ER30001 match1968
 
+/*
+    As of 1968 wave, if person is still in school, "years school complete"
+    variable
+    is coded to 0.
+*/
 rename ER30010 educ1968
-rename ER30052 educ1969
-rename ER30076 educ1970
-rename ER30100 educ1971
-rename ER30126 educ1972
-rename ER30147 educ1973
+rename ER30052 educ1970
+rename ER30076 educ1971
+rename ER30100 educ1972
+rename ER30126 educ1973
 rename ER30147 educ1974
 rename ER30169 educ1975
 rename ER30197 educ1976
