@@ -19,24 +19,24 @@ local twoweek 30/14
 use $root\fam_2007\fam_2007
 rename ER36002 match2007
 rename ER36016 famsize2007
-rename ER36028 hometype2007		//1 own or buying, 5 rent
+rename ER36028 hometype2007         //1 own or buying, 5 rent
 rename ER41027 tfinc2006
 rename ER41069 wt2007
 rename ER36004 state2007
 rename ER36018 sexofhead2007
 rename ER40565 headrace2007
 rename ER40921 headlabor2006
-rename ER36013 mrstat2007			//1 married, 2 single, 3 widowed, 4 divored, 5 separated
-rename ER40933 wifelabor2006	
+rename ER36013 mrstat2007            //1 married, 2 single, 3 widowed, 4 divored, 5 separated
+rename ER40933 wifelabor2006    
 rename ER36020 numchild2007
 rename ER36044 mortmo2007
 rename ER36065 rentmo2007
 rename ER36042 mortpri2007
 rename ER36029 hvalue2007
 rename ER36673 stamps2006
-rename ER36674 stampsper2006		//3 week, 4 two weeks, 5 month, 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap.
+rename ER36674 stampsper2006        //3 week, 4 two weeks, 5 month, 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap.
 rename ER36706 foodhome_st2006
-rename ER36707 foodhomeper_st2006	//2 day, 3 week, 4 two weeks, 5 month, 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap. 
+rename ER36707 foodhomeper_st2006    //2 day, 3 week, 4 two weeks, 5 month, 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap. 
 rename ER36710 fooddel_st2006
 rename ER36711 fooddelper_st2006
 rename ER36713 foodout_st2006
@@ -50,14 +50,14 @@ rename ER36724 foodoutper2006
 keep  $keeper
 
 foreach sta in 2 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps2 = . if stamps2>=999997
 replace stamps2 = stamps2*`day' if stampsper==2
@@ -106,14 +106,14 @@ rename ER25706 foodoutper2004
 keep  $keeper
 
 foreach sta in 2 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps2 = . if stamps2>=999997
 replace stamps2 = stamps2*`day' if stampsper==2
@@ -163,14 +163,14 @@ rename ER21704 foodoutper2002
 keep  $keeper
 
 foreach sta in 2 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps2 = . if stamps2>=999997
 replace stamps2 = stamps2*`day' if stampsper==2
@@ -222,14 +222,14 @@ gen headlabor=1
 keep HU heademp  $keeper 
 
 foreach sta in 2 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps2 = . if stamps2>=999997
 replace stamps2 = stamps2*`day' if stampsper==2
@@ -243,8 +243,8 @@ egen foodouttot2000 = rowtotal(foodout_st foodout2)
 
 drop headlabor
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -288,20 +288,20 @@ rename ER14300 foodout1998
 rename ER14301 foodoutper1998
 keep HU heademp  $keeper 
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 
 foreach sta in 1 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps1 = . if stamps1>=999997
 replace stamps1 = stamps1*`day' if stampsper==2
@@ -352,21 +352,21 @@ rename ER11081 foodout1996
 rename ER11082 foodoutper1996
 keep HU heademp  $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
 
 foreach sta in 1 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps1 = . if stamps1>=99997
 replace stamps1 = stamps1*`day' if stampsper==2
@@ -399,7 +399,7 @@ rename ER8932 plan13_mos
 rename ER8933 plan13_wks
 rename ER8934 plan13_done
 rename ER8935 debt_totfiled
-rename ER8936 debt_totremain	//over 997 drop
+rename ER8936 debt_totremain    //over 997 drop
 rename ER8918 stfiled
 rename ER9248 state1996
 rename ER9251 wt1996
@@ -410,7 +410,7 @@ rename ER7013 mrstat1996
 rename ER7528 HU1995
 rename ER7283 heademp1995
 rename ER9235 wifelabor1995
-rename ER7657 wifeemploy1996	//1=working, 2=temporarily laid off, sick/maternity, 3=unemployed, 4=retired, 5=disabled, 6=keeping house, 7=student, 8=other, jail, 0=N/A
+rename ER7657 wifeemploy1996    //1=working, 2=temporarily laid off, sick/maternity, 3=unemployed, 4=retired, 5=disabled, 6=keeping house, 7=student, 8=other, jail, 0=N/A
 rename ER7009 numchild1996
 rename ER7044 mortmo1996
 rename ER7121 rentmo1996
@@ -433,21 +433,21 @@ rename ER8186 foodout1995
 rename ER8187 foodoutper1995
 keep HU heademp wifeemploy  $keeper $B state1996
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
 
 foreach sta in 1 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps1 = . if stamps1>=99997
 replace stamps1 = stamps1*`day' if stampsper==2
@@ -466,7 +466,7 @@ use $root\fam_1995\fam_1995, clear
 rename ER5005 famsize1995
 rename ER5002 match1995
 rename ER5031 hometype1995
-rename ER6993 tfinc1994 	//9999998 high
+rename ER6993 tfinc1994     //9999998 high
 rename ER6997 state1995
 rename ER5007 sexofhead1995
 rename ER6814 headrace1995
@@ -498,21 +498,21 @@ rename ER6089 foodout1994
 rename ER6090 foodoutper1994
 keep HU heademp wifeemploy  $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
 
 foreach sta in 1 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 replace stamps1 = . if stamps1>=99997
 replace stamps1 = stamps1*`day' if stampsper==2
@@ -531,7 +531,7 @@ use $root\fam_1994\fam_1994, clear
 rename ER2006 famsize1994
 rename ER2032 hometype1994
 rename ER2002 match1994
-rename ER4153 tfinc1993		//9999998 high
+rename ER4153 tfinc1993        //9999998 high
 rename ER4157 state1994
 rename ER2008 sexofhead1994
 rename ER3944 headrace1994
@@ -563,21 +563,21 @@ rename ER3090 foodout1993
 rename ER3091 foodoutper1993
 keep HU heademp wifeemploy  $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
 
 foreach sta in 1 _st {
-	foreach var in home del out {
-		replace food`var'`sta' = . if food`var'`sta'>=99997
-		replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
-		replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
-		replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
-		replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
-		replace food`var'`sta' = . if food`var'per`sta'>6
-	}
+    foreach var in home del out {
+        replace food`var'`sta' = . if food`var'`sta'>=99997
+        replace food`var'`sta' = food`var'`sta'*`day' if food`var'per`sta'==2
+        replace food`var'`sta' = food`var'`sta'*`week' if food`var'per`sta'==3
+        replace food`var'`sta' = food`var'`sta'*`twoweek' if food`var'per`sta'==4
+        replace food`var'`sta' = food`var'`sta'/12 if food`var'per`sta'==6
+        replace food`var'`sta' = . if food`var'per`sta'>6
+    }
 }
 
 replace stamps1 = . if stamps1>=99997
@@ -622,8 +622,8 @@ rename V21711 foodout1993
 
 keep HU heademp wifeemploy $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -673,8 +673,8 @@ rename V20407 foodhome1991
 rename V20411 stamps1991
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -715,8 +715,8 @@ rename V19107 foodhome1990
 rename V19111 stamps1990
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -757,8 +757,8 @@ rename V17807 foodhome1989
 rename V17811 stamps1989
 keep HU heademp wifeemploy $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -800,8 +800,8 @@ gen mort=0
 keep HU heademp wifeemploy numadult $keeper
 drop foodout mort rent foodhome
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -836,8 +836,8 @@ gen rent = 0
 keep HU heademp wifeemploy numadult $keeper
 drop foodout mort rent foodhome
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -871,8 +871,8 @@ rename V13876 foodhome1986
 rename V13880 stamps1986
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -913,8 +913,8 @@ rename V12774 foodhome1985
 rename V12778 stamps1985
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -955,8 +955,8 @@ rename V11375 foodhome1984
 rename V11379 stamps1984
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -997,8 +997,8 @@ rename V10235 foodhome1983
 rename V10239 stamps1983
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1039,8 +1039,8 @@ rename V8864 foodhome1982
 rename V8868 stamps1982
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1082,8 +1082,8 @@ gen mort = 0
 keep HU heademp wifeemploy numadult $keeper
 drop mort mortpri
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1124,8 +1124,8 @@ rename V7564 foodhome1980
 rename V7568 stamps1980
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1166,8 +1166,8 @@ rename V6972 foodhome1979
 rename V6976 stamps1979
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1211,8 +1211,8 @@ rename V6374 bonusstamp
 gen stamps1978 = paidstamp + bonusstamp if paidstamp<999 & bonusstamp<999
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1255,8 +1255,8 @@ rename V5768 bonusstamp
 gen stamps1977 = paidstamp + bonusstamp if paidstamp<999 & bonusstamp<999
 keep HU heademp numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1299,8 +1299,8 @@ rename V5269 bonusstamp
 gen stamps1976 = paidstamp + bonusstamp if paidstamp<999 & bonusstamp<999
 keep HU heademp numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
@@ -1344,8 +1344,8 @@ rename V4359 bonusstamp
 gen stamps1975 = paidstamp + bonusstamp if paidstamp<999 & bonusstamp<999
 keep HU heademp wifeemploy numadult $keeper
 foreach s in HU heademp {
-	replace `s' = . if `s' ==8 | `s'==9 | `s'==0
-	replace `s' = 0 if `s'==5
+    replace `s' = . if `s' ==8 | `s'==9 | `s'==0
+    replace `s' = 0 if `s'==5
 }
 replace heademp = HU if heademp==.
 drop HU
