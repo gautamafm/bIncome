@@ -1,6 +1,18 @@
 /*
-Takes prepared yearly PSID family data from "smalldata" directory (created by dataprep_a) and matches individuals through the years
-using the individual-level dataset.  Two separate files are created: bankruptpeople1, nonbankpeople1
+Takes prepared yearly PSID family data from "smalldata" directory (created by
+dataprep_a) and matches individuals through the years using the
+individual-level dataset.
+
+Two separate files are created: bankruptpeople1, nonbankpeople1
+
+Steps:
+1) Load the family data from 1996 (bankruptcy response year), `small1996`
+2) Keep bankrupty and non-bankrupt people separate for some reason...
+3) Merge in all of the other family data files on own-year Interview Number
+    (family's unique ID)
+4) Deflate all dollar-valued variables using CPI
+5) 
+
 */
 
 clear all
@@ -24,7 +36,7 @@ foreach round in bank nobank {
 	if ("`round'"=="bank") keep if yr>=1985 & yr<=1996		//keep people who filed between 1985 and 1996 for bankrupt round
 	if ("`round'"=="nobank") keep if yr==0					//keep non-filers for non-bankrupt round
 	
-	merge match1996 using individual_small, uniqm sort		//merge in individual multi-year dataset
+	merge match1996 using $DATA_PATH/individual_small, uniqm sort		//merge in individual multi-year dataset
 	keep if _m==3
 	drop _m
 	
@@ -40,8 +52,8 @@ foreach round in bank nobank {
 		if ("`round'"=="nobank") keep if yr==0
 	}
 
-	cross using cpi1970_wide	//deflators
-	cross using badyear_wide	//t-2 income fix
+	cross using "d:\users\daniel\google drive\postbinc\cpi1970_wide"	//deflators
+	cross using "d:\users\daniel\google drive\postbinc\badyear_wide"	//t-2 income fix
 															//Begin deflations
 	foreach i of num 2006 2004 2002(-1)1974 {
 		replace tfinc`i' = . if tfinc`i'>=9999998
@@ -181,6 +193,6 @@ foreach round in bank nobank {
 
 	replace match=. if match==0
 
-	if ("`round'"=="bank") save bankruptpeople1, replace
-	else if ("`round'"=="nobank") save nonbankpeople1, replace
+	if ("`round'"=="bank") save $DATA_PATH/bankruptpeople1, replace
+	else if ("`round'"=="nobank") save $DATA_PATH/nonbankpeople1, replace
 }
