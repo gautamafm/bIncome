@@ -59,7 +59,7 @@ def load_full_panel(_load=True, _rebuild=False, _rebuild_down=False):
             lambda x: x.replace('', method='ffill'),
             axis=0)
     # Fill all bankruptcy variables
-    for col in BANKVARS:
+    for col in BANKVARS + ('longweight',):
         pan[col].fillna(method='bfill', axis=1, inplace=True)
         pan[col].fillna(method='ffill', axis=1, inplace=True)
 
