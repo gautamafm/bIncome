@@ -60,10 +60,6 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
 
     return df
 
-def _f_age17(x):    #noqa
-    if x.loc[x['event_year'] == 0, 'age'].squeeze() > 28:
-        return x
-
 
 if __name__ == '__main__':
-    pass
+    df = load_bankrupt_panel(_load=False)
