@@ -17,6 +17,7 @@ local week 30/7
 local twoweek 30/14
 
 use $root\fam_2007\fam_2007
+
 rename ER36002 match2007
 rename ER36016 famsize2007
 rename ER36028 hometype2007         //1 own or buying, 5 rent
@@ -26,7 +27,8 @@ rename ER36004 state2007
 rename ER36018 sexofhead2007
 rename ER40565 headrace2007
 rename ER40921 headlabor2006
-rename ER36013 mrstat2007            //1 married, 2 single, 3 widowed, 4 divored, 5 separated
+rename ER36013 mrstat2007           // 1 married, 2 single, 3 widowed,
+                                    // 4 divored, 5 separated
 rename ER40933 wifelabor2006    
 rename ER36020 numchild2007
 rename ER36044 mortmo2007
@@ -34,9 +36,11 @@ rename ER36065 rentmo2007
 rename ER36042 mortpri2007
 rename ER36029 hvalue2007
 rename ER36673 stamps2006
-rename ER36674 stampsper2006        //3 week, 4 two weeks, 5 month, 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap.
+rename ER36674 stampsper2006        // 3 week, 4 two weeks, 5 month, 6 year,
+                                    // 7 other, 8 DK, 9 NA refused, 0 Inap.
 rename ER36706 foodhome_st2006
-rename ER36707 foodhomeper_st2006    //2 day, 3 week, 4 two weeks, 5 month, 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap. 
+rename ER36707 foodhomeper_st2006    // 2 day, 3 week, 4 two weeks, 5 month,
+                                     // 6 year, 7 other, 8 DK, 9 NA refused, 0 Inap. 
 rename ER36710 fooddel_st2006
 rename ER36711 fooddelper_st2006
 rename ER36713 foodout_st2006
@@ -64,7 +68,7 @@ replace stamps2 = stamps2*`day' if stampsper==2
 replace stamps2 = stamps2*`week' if stampsper==3
 replace stamps2 = stamps2*`twoweek' if stampsper==4
 replace stamps2 = stamps2/12 if stampsper==6 
-replace stamps2 = . if stampsper==6
+replace stamps2 = . if stampsper==6 // XXX wrong!
 
 egen foodtot2006 = rowtotal(stamps2 foodhome_st fooddel_st foodout_st foodhome2 fooddel2 foodout2)
 egen foodouttot2006 = rowtotal(foodout_st foodout2)
@@ -618,7 +622,7 @@ rename V21610 hvalue1993
 rename V21713 stamps1992
 rename V21714 stampsper1992
 rename V21707 foodhome1992
-rename V21711 foodout1993
+rename V21711 foodout1992
 
 keep HU heademp wifeemploy $keeper
 foreach s in HU heademp {
