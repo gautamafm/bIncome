@@ -10,10 +10,8 @@ from clean.psid.codebook import family_std, indiv_std
 
 PSID_PATH = src_path('psid')
 
-BANKVARS = ('bank_filed', 'bank_year', 'bank_state', 'bank_2year',
-            'bank_chapter', 'bank_count', 'bank_assets_seized',
-            'bank_assets_seized_value', 'bank_plan13_completed',
-            'bank_debt_filed', 'bank_debt_remained',)
+BANKVARS = ('bank_filed', 'bank_year', 'bank_state',
+            'bank_count', 'bank_debt_filed', 'bank_debt_remained',)
 
 
 def load_full_panel(_load=True, _rebuild=False, _rebuild_down=False):
