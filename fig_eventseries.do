@@ -1,8 +1,10 @@
 clear all
 set more off
 
+run util/env.do
+
 cap log close
-noi cap log using fig_eventseries01 , replace
+// noi cap log using fig_eventseries01 , replace
 set scheme s2manual
 graph set eps logo off 
 graph set eps mag 195
@@ -17,9 +19,9 @@ graph set eps fontface times
 // incdist01 is an observation for each time period (-10 to 10) for each 
 //  income bin 2-6 plus bankrupt
 
-use incdist01, replace
+use $DATA_PATH/incdist01, clear
 cap drop temp
-drop if time==.
+drop if time == .
 
 // get missing years
 fillin year incbin time  
@@ -59,17 +61,17 @@ gen inclo = inc100 - 1.96*se
 
 twoway rarea inchi inclo time if abs(time)<11  ||  connected inc100 time if abs(time)<11, /// 
   title(Figure 1: Median Real Household Income of Bankrupt)  subtitle(Decade Before and After Filing) /// 
-  saving(fig_Bevent1 , replace) name(fig_Bevent1, replace) xline(0) ylabel(35(5)70) /// 
+  saving($OUT_PATH/fig_Bevent1 , replace) name(fig_Bevent1, replace) xline(0) ylabel(35(5)70) /// 
   ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) || , legend(off)
   
-graph export fig_Bevent1.eps , replace
+graph export $OUT_PATH/fig_Bevent1.pdf , replace
 
 label var inc100 "Bankrupt"
 twoway connected inc100 time || line inc3 inc4 inc5 time || if abs(time)<11, /// 
-title(Figure 2: Median Real Household Income of Bankrupt) subtitle(Compared to Peers)  /// 
-saving(fig_Bevent2 , replace) name(fig_Bevent2, replace) xline(0) ylabel(35(5)70) /// 
-ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) 
-graph export fig_Bevent2.eps , replace
+    title(Figure 2: Median Real Household Income of Bankrupt) subtitle(Compared to Peers)  /// 
+    saving($OUT_PATH/fig_Bevent2 , replace) name(fig_Bevent2, replace) xline(0) ylabel(35(5)70) /// 
+    ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) 
+graph export $OUT_PATH/fig_Bevent2.pdf , replace
 
 gen dif5 = inc100 - inc5
 gen dif4 = inc100 - inc4
@@ -96,9 +98,14 @@ label var sim_def "Yearly Deficit"
 label var sim_debt "Cumulative Debt"
 label var time "Years Before Filing"
 
-twoway bar sim_def time if time<1 & time>-11, barwidth(.8) || connected sim_debt time if time<1 & time>-11 , yaxis(2) , title(Figure 3: Hypothetical Debt and Deficit) subtitle(In Thousands of Dollars) legend(on) saving(fig_debt1, replace) ylabel( 2(-2)-12 , axis(1)) ylabel( 10(-10)-60 , axis(2))
-
-graph export fig_debt1.eps, replace
+twoway bar sim_def time if time<1 & time>-11, barwidth(.8) || ///
+        connected sim_debt time if time<1 & time>-11 , yaxis(2) , ///
+        title(Figure 3: Hypothetical Debt and Deficit) ///
+        subtitle(In Thousands of Dollars) legend(on) ///
+        ylabel( 2(-2)-12 , axis(1)) ylabel( 10(-10)-60 , axis(2)) ///
+        saving($OUT_PATH/fig_debt1, replace)
+graph export $OUT_PATH/fig_debt1.pdf, replace
+asdf
 
 /******************************************************************/
 // CONSUMPTION
