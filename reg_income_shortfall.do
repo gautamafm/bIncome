@@ -105,8 +105,6 @@ drop trash*
 ****************************************************
 ****************************************************
 
-asdf
-
 forval i = 1/3 {
  probit B10  avshort`i'  $controls if year<=1986 & year>=1976    [pw=altwt], cluster(id)
   est store p`i'1
