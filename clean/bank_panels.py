@@ -18,6 +18,7 @@ def load_nonbankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
         return df
 
     df = load_full_panel(_rebuild=_rebuild_down).reset_index('year')
+    df = df.query('sequence_number != 0').copy()
     df = df.query('bank_filed == 0').copy()
 
     return df
@@ -35,20 +36,13 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
         return df
 
     df = load_full_panel(_rebuild=_rebuild_down).reset_index('year')
+    df = df.query('sequence_number != 0').copy()
     df = df.query('bank_filed == 1').copy()
 
     df['event_year'] = df['year'] - df['bank_year']
-    # Restrict to "head in year of bankruptcy"
-    df['temp'] = (
-        (df['event_year'] == 0) &
-        (df['relhead'] == 'head') &
-        (df['sequence_number'] == 1)
-    )
-    df['is_head'] = df.groupby(level='person_id',
-                               axis=0)['temp'].transform('max')
-    df = df[df['is_head'] == 1]
-    df.drop(['is_head', 'temp'], axis=1, inplace=True)
-
+    # Restrict to "head or wife in year of bankruptcy"
+    flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
+    df = df[df[['bank_is_head', 'bank_is_wife']].max(axis=1)].copy()
     # Restrict to "age>28 at bankruptcy"
     age28 = df.loc[df['event_year'] == 0, 'age'] >= 28
     df = df.join(age28.to_frame('age28'))
@@ -61,5 +55,27 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
     return df
 
 
+def flag_bankyear_couple(df):
+    df['temp'] = (
+        (df['event_year'] == 0) &
+        (df['relhead'] == 'head') &
+        (df['sequence_number'] == 1)
+    )
+    df['bank_is_head'] = df.groupby(level='person_id',
+                                    axis=0)['temp'].transform('max')
+    # Get 'wife' (not always `sequence_number = 2`, but wife is unique w/in
+    # `interview_number` up to a couple coding errors that should be outside the
+    # sample)
+    df['temp'] = (
+        (df['event_year'] == 0) &
+        (df['relhead'] == 'wife') &
+        ((df['sequence_number'] <= 10)      # In the family
+         | (df['sequence_number'] == 51))   # or 'institutionalized'
+    )
+    df['bank_is_wife'] = df.groupby(level='person_id',
+                                    axis=0)['temp'].transform('max')
+    df.drop('temp', axis=1, inplace=True)
+
+
 if __name__ == '__main__':
-    df = load_bankrupt_panel(_load=False)
+    pass
