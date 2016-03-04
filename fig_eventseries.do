@@ -52,69 +52,82 @@ foreach var of varlist inc* {
 }
 
 
-// standard errors are about 1.4 until t+5 then 1.48 1.54 1.58 1.63 1.73
-// XXX Hard coded std errors!!
-gen se = 1.4 + .045*max(time-4,0)
-replace se = 1.73 if time==10
+cap prog drop all
+prog def plot_income_es_bank_only
+    // standard errors are about 1.4 until t+5 then 1.48 1.54 1.58 1.63 1.73
+    // XXX Hard coded std errors!!
+    gen se = 1.4 + .045*max(time-4,0)
+    replace se = 1.73 if time==10
 
-gen inchi = inc100 + 1.96*se
-gen inclo = inc100 - 1.96*se
+    gen inchi = inc100 + 1.96*se
+    gen inclo = inc100 - 1.96*se
 
-twoway  rarea inchi inclo time if abs(time)<11  || ///
-        connected inc100 time if abs(time)<11, /// 
-        title("Figure 1: Median Real Household Income of Bankrupt") ///
-        subtitle(Decade Before and After Filing) /// 
-        ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) ///
-        legend(off) xline(0) ylabel(35(5)70) /// 
-        saving($OUT_PATH/fig_Bevent1 , replace) name(fig_Bevent1, replace)
-graph export $OUT_PATH/fig_Bevent1.pdf , replace
+    twoway  rarea inchi inclo time if abs(time)<11  || ///
+            connected inc100 time if abs(time)<11, /// 
+            title("Figure 1: Median Real Household Income of Bankrupt") ///
+            subtitle(Decade Before and After Filing) /// 
+            ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) ///
+            legend(off) xline(0) ylabel(35(5)70) /// 
+            saving($OUT_PATH/fig_Bevent1 , replace) name(fig_Bevent1, replace)
+    graph export $OUT_PATH/fig_Bevent1.pdf , replace
+end
 
-label var inc100 "Bankrupt"
-twoway connected inc100 time || line inc3 inc4 inc5 time || if abs(time)<11, /// 
-    title("Figure 2: Median Real Household Income of Bankrupt") ///
-    subtitle("Compared to Peers")  /// 
-    ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall))  ///
-    xline(0) ylabel(35(5)70) /// 
-    saving($OUT_PATH/fig_Bevent2 , replace) name(fig_Bevent2, replace)
-graph export $OUT_PATH/fig_Bevent2.pdf , replace
+prog def plot_income_es
+    label var inc100 "Bankrupt"
+    twoway connected inc100 time || line inc3 inc4 inc5 time || if abs(time)<11, /// 
+        title("Figure 2: Median Real Household Income of Bankrupt") ///
+        subtitle("Compared to Peers")  /// 
+        ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall))  ///
+        xline(0) ylabel(35(5)70) /// 
+        saving($OUT_PATH/fig_Bevent2 , replace) name(fig_Bevent2, replace)
+    graph export $OUT_PATH/fig_Bevent2.pdf , replace
+end
 
-gen dif5 = inc100 - inc5
-gen dif4 = inc100 - inc4
-gen dif3 = inc100 - inc3
+prog def _floater_code
+    gen dif5 = inc100 - inc5
+    gen dif4 = inc100 - inc4
+    gen dif3 = inc100 - inc3
 
-gen timesq= time*time
-tsset time
-prais dif5 time timesq
-prais dif4 time timesq
-prais dif3 time timesq
+    gen timesq= time*time
+    tsset time
+    prais dif5 time timesq
+    prais dif4 time timesq
+    prais dif3 time timesq
 
-gen debt30 = sum(dif3)
-list debt30 time
+    gen debt30 = sum(dif3)
+    list debt30 time
+end
 
-sort time
-gen sim_inc = (inc4 + inc5)/2
-gen sim_def = inc100 - sim_inc
-gen def40 = inc100 - inc4
+prog def plot_simulated_debt
+    sort time
+    gen sim_inc = (inc4 + inc5)/2
+    gen sim_def = inc100 - sim_inc
+    gen def40 = inc100 - inc4
 
-gen debt40 = sum(def40)
-gen sim_debt = sum(sim_def)
+    gen debt40 = sum(def40)
+    gen sim_debt = sum(sim_def)
 
-label var sim_def "Yearly Deficit"
-label var sim_debt "Cumulative Debt"
-label var time "Years Before Filing"
+    label var sim_def "Yearly Deficit"
+    label var sim_debt "Cumulative Debt"
+    label var time "Years Before Filing"
 
-twoway bar sim_def time if time<1 & time>-11, barwidth(.8) || ///
-        connected sim_debt time if time<1 & time>-11 , yaxis(2) , ///
-        title("Figure 3: Hypothetical Debt and Deficit") ///
-        subtitle("In Thousands of Dollars") legend(on) ///
-        ylabel( 2(-2)-12 , axis(1)) ylabel( 10(-10)-60 , axis(2)) ///
-        saving($OUT_PATH/fig_debt1, replace)
-graph export $OUT_PATH/fig_debt1.pdf, replace
+    twoway bar sim_def time if time<1 & time>-11, barwidth(.8) || ///
+            connected sim_debt time if time<1 & time>-11 , yaxis(2) , ///
+            title("Figure 3: Hypothetical Debt and Deficit") ///
+            subtitle("In Thousands of Dollars") legend(on) ///
+            ylabel( 2(-2)-12 , axis(1)) ylabel( 10(-10)-60 , axis(2)) ///
+            saving($OUT_PATH/fig_debt1, replace)
+    graph export $OUT_PATH/fig_debt1.pdf, replace
+end
+
+plot_income_es
+
+exit
 
 /******************************************************************/
 // CONSUMPTION
 /******************************************************************/
-use incdist01, replace
+use $DATA_PATH/incdist01, replace
 local vars housing foodtot  foodouttot famsize  heq  // mort hvalue  mortpri heq_ratio   rent homeowner  
 
 cap drop temp
