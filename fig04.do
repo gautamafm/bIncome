@@ -3,11 +3,18 @@ clear all
 set more off
 
 cap log close
-noi cap log using fig03 , replace
+noi cap log using fig04 , replace
 
 cd
 cd "Google Drive"
 cd Postbinc
+
+
+//  fig04 is going to try to simplify this mess a fair bit.  
+//  instead of a new set of weights for each year, we'll just use the Bwt weights
+//  which are averaged over the whole sample.  or at least that will be my goal
+
+
 
 /**********************************************************/
 // bankruptcy weights -- make a set of weights (Bwt) that make the rest of the
@@ -39,27 +46,31 @@ foreach var of varlist `C' {
 	
 	
 forval year = 1975(1)1986 {
-    //  2014 -- is this what I want?
 	// 2014 find the weight of the B in that year
-	// but note that this is the weight of all the people who ever file, not just in `year'
+	// but without eventyr restriction this is the weight of all the people who ever file, not just file in `year'
 	//  the eventyr restriction made it just the filing -10 year.  I am not sure which way I want it
-	//  yet
+	//  yet -- 
+
+	// I use Btot to weight each year when I collapse down to the ES
 	qui summ Bwt if /*eventyr==-10 &*/ year == `year' & B // this is the total weight of the B in that year
-	local Btot = r(sum) //  put this aggregate weight in the local Btot
+	local Btot = r(sum) //  put this aggregate weight in the local Btot 
 	
-	// now I assign the year's weight's to each person across his whole profile based on
+	// now I assign the year's weights to each nonB person across his whole profile based on
 	// the Bwt that I used in the t-10 year 
-	bys id : gen tempwt = Bwt if !B & year==`year' // only one -- these are not B
+	// note that the B will all have missing tempwt
+	bys id : gen tempwt = Bwt if !B & year==`year' // only one -- these are not B people
 	bys id : egen Bwtlife`year' = sum(tempwt) // only one nonempty so Bwtlife`year' is constant over the id
 	replace Bwtlife`year' = 0 if Bwtlife`year' == .
 
 	/**********************************************************/ 
-	// income profiles based on t-10 income
+	// income profile bins for nonB based on t-10 income
 	sort inc3
-	gen temp = sum(tempwt) 
-	gen incbin`year' = 1 + floor(9.9999*temp/temp[_N]) if inc3<. & !B & year ==`year'  // makes ten income buckets
-	drop temp tempwt
-    // 2014 -- assigns the one nonmissing incbin across all person's observations	
+	gen temp = sum(tempwt) //  these are nonmissing for the current year
+	bys inc3: gen trash = temp/temp[_N] // this goes from 0 to 1 by income but only on this years obs 
+	gen incbin`year' = 1 + floor(9.9999*trash) if inc3<. & !B & year ==`year'  // makes ten income buckets
+	drop temp tempwt trash
+	// the above only assigns a value in the current year
+    // assigns the one nonmissing temp incbin across all person's observations	
 	bys id (incbin`year') : gen temp_incbin = incbin`year'[1] 
 	di " year = `year' "	
 
@@ -123,6 +134,7 @@ save tempdata, replace
 
 
 //  2014 -- I think the next section is for creating income shock distributions
+// not sure we want those anymore
 use tempdata
 // get income bins and reweight to be the same as the B income distn at t-10
 egen incbin = rsum(incbin*)  if !B // only one is nonmissing

@@ -10,9 +10,8 @@
 clear all
 set more off
 
-run clean/io
-
 cap log close
+log using data05 , replace
 
 set scheme s2manual
 graph set eps logo off 
@@ -20,15 +19,17 @@ graph set eps mag 195
 graph set eps fontface times
 
 
+/*
+
 /******************************************************/
 // DATA CREATION
 /******************************************************/
 
 
-use $DATA_PATH/bankruptpeople1
+use bankruptpeople1
 gen byte B=1
 
-append using $DATA_PATH/nonbankpeople1
+append using nonbankpeople1
 replace B=0 if B==.
 compress
 replace inc=. if inlist(year,2003,2005,2007)  // 2014 is this still a good idea?
@@ -245,6 +246,73 @@ qui summ lsaving
 xtset
 gen t = year - 1975
 
+/*
+/******************************************************/
+// grab the worst year and the number of years that are negative
+/******************************************************/
+cap drop trash
+gen trash = inc<.
+gen byte worstyear=.
+forval i = 1(1)10 {
+	local i1 = `i'-1
+	bys id (year): replace worstyear = `i' if mind1==f`i1'.d1 & worstyear==.
+	bys id (year): gen byte neg0k`i' = f`i1'.d1<0  if f`i1'.d1<.   // only count if inc is there
+	
+	bys id (year): gen byte neg5k`i' = f`i1'.d1<-5000  if f`i1'.d1<.   // only count if inc is there
+	bys id (year): gen byte pos5k`i' = f`i1'.d1>5000  if f`i1'.d1<.   // only count if inc is there	
+
+	bys id (year): gen byte neg15k`i' = f`i1'.d1<-15000  if f`i1'.d1<.   // only count if inc is there
+	bys id (year): gen byte pos15k`i' = f`i1'.d1>15000  if f`i1'.d1<.   // only count if inc is there	
+	
+}		
+
+
+// histogram worstyear [aw=Bwt] if eventyr==-10 | !B  , discrete 
+
+summ neg0k* [aw=Bwt] if B==0
+
+graph bar neg0k* [w=wt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with Negative Income Shock) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with Negative Income Shocks) subtitle(Before Bankruptcy) yline(.46 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(neg0k, replace)
+graph export neg0k.eps, replace
+
+
+summ neg5k* [aw=Bwt] if B==0 & inrange(year, 1975,1985)
+
+graph bar neg5k* [w=Bwt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with $5K Income Drop) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with $5000 Income Drop In One Year) subtitle(Before Bankruptcy) yline(.30 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(neg5k, replace)
+graph export neg5k.eps, replace
+
+
+summ neg15k* [aw=Bwt] if B==0 & inrange(year, 1975,1985)
+
+graph bar neg15k* [w=Bwt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with $15K Income Drop) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with $15000 Income Drop In One Year) subtitle(Before Bankruptcy) yline(.155 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(neg15k, replace)
+graph export neg15k.eps, replace
+
+
+summ pos5k* [aw=Bwt] if B==0 & inrange(year, 1975,1985)
+
+graph bar pos5k* [w=Bwt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with $5K Income Increase) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with $5000 Income Increase In One Year) subtitle(Before Bankruptcy) yline(.36 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(pos5k, replace)
+graph export pos5k.eps, replace
+*/
+
+
+
+// make ten year averages
+
+/*
+foreach var of varlist t inc linc housing foodouttot foodtot famsize {
+	cap drop trash
+	gen trash = `var'<.
+	gen av`var'10 = cond(trash==1,`var',0)
+	forval i = 1(1)10 {
+		local i1 = `i'-1
+		bys id (year): replace trash = trash+1 if f`i'.inc<. & f`i'.`var'<.   // only count if inc is there
+		bys id (year): replace av`var'10 = av`var'10 + f`i'.`var' if f`i'.`var'<. & f`i'.inc<.
+
+		}
+	replace av`var'10 = av`var'10/trash
+	cap drop trash
+}
+*/
+
 // makes averages
 av10 t inc linc housing foodouttot foodtot famsize
 
@@ -255,9 +323,10 @@ av10 t inc linc housing foodouttot foodtot famsize
 
 compress
 xtset
-saveold $DATA_PATH/regdata03, replace
+saveold regdata03, replace
+*/ 
 
-asdf
+
 
 /******************************************************/
 // REGRESSIONS

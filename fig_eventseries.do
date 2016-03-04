@@ -1,15 +1,23 @@
 clear all
 set more off
 
-run clean/io
-
 cap log close
+noi cap log using fig_eventseries01 , replace
+set scheme s2manual
+graph set eps logo off 
+graph set eps mag 195
+graph set eps fontface times
+
+
 
 /******************************************************************/
 // INCOME 
 /******************************************************************/
 // post data clean up
-use $DATA_PATH/incdist01, replace
+// incdist01 is an observation for each time period (-10 to 10) for each 
+//  income bin 2-6 plus bankrupt
+
+use incdist01, replace
 cap drop temp
 drop if time==.
 
@@ -17,12 +25,14 @@ drop if time==.
 fillin year incbin time  
 drop _fillin
 
+// currently this affects no obs
+bys incbin year (time) : replace Btot = Btot[1] if Btot==. // give Btot to all the later obs
+
 // interpolation on missing years
-bys incbin year (time) : replace Btot = Btot[1] if Btot==.
 bys incbin year (time) : replace inc1 = .5*inc1[_n-1] + .5* inc1[_n+1] if inc1==.
 bys incbin year (time) : replace inc1 = inc1[_n-1] + (inc1[_n-1] - inc1[_n-2])  if inc1==. 
 
-// collapse into one weighted dataset
+// collapse years into one weighted dataset
 collapse  (mean) inc = inc1  [pw=Btot] , by(incbin time)
 reshape wide inc , j(incbin) i(time)
 
@@ -47,12 +57,18 @@ replace se = 1.73 if time==10
 gen inchi = inc100 + 1.96*se
 gen inclo = inc100 - 1.96*se
 
-twoway rarea inchi inclo time if abs(time)<11  ||  connected inc100 time if abs(time)<11, title(Figure 1: Median Real Household Income of Bankrupt)  subtitle(Decade Before and After Filing) saving(fig_Bevent1 , replace) name(fig_Bevent1, replace) xline(0) ylabel(35(5)70) ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) || , legend(off)
-//graph export fig_Bevent1.eps , replace
+twoway rarea inchi inclo time if abs(time)<11  ||  connected inc100 time if abs(time)<11, /// 
+  title(Figure 1: Median Real Household Income of Bankrupt)  subtitle(Decade Before and After Filing) /// 
+  saving(fig_Bevent1 , replace) name(fig_Bevent1, replace) xline(0) ylabel(35(5)70) /// 
+  ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) || , legend(off)
+  
+graph export fig_Bevent1.eps , replace
 
 label var inc100 "Bankrupt"
-twoway connected inc100 time || line inc3 inc4 inc5 time || if abs(time)<11, title(Figure 2: Median Real Household Income of Bankrupt) subtitle(Compared to Peers)  saving(fig_Bevent2 , replace) name(fig_Bevent2, replace) xline(0) ylabel(35(5)70) ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) 
-asdf
+twoway connected inc100 time || line inc3 inc4 inc5 time || if abs(time)<11, /// 
+title(Figure 2: Median Real Household Income of Bankrupt) subtitle(Compared to Peers)  /// 
+saving(fig_Bevent2 , replace) name(fig_Bevent2, replace) xline(0) ylabel(35(5)70) /// 
+ytitle("Median HH Income (in thousands of 2009 $)" , margin(vsmall)) 
 graph export fig_Bevent2.eps , replace
 
 gen dif5 = inc100 - inc5
