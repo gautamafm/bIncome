@@ -1,3 +1,4 @@
+""" NOTE: NO Sample restriction or variable creation in this file!!! """
 from __future__ import division, print_function
 from os.path import join
 
@@ -15,7 +16,12 @@ BANKVARS = ('bank_filed', 'bank_year', 'bank_state',
 
 
 def load_full_panel(_load=True, _rebuild=False, _rebuild_down=False):
-    """ Conditional on being interviewed in 1996.  """
+    """
+    Create full PSID panel, conditional on being interviewed in 1996.
+
+    This does not create any variables or restrict the sample in any way, other
+    than starting with 1996 households.
+    """
     if _load:
         file_path = data_path('panel_full.p')
         df = load_or_build(file_path,
@@ -62,12 +68,6 @@ def load_full_panel(_load=True, _rebuild=False, _rebuild_down=False):
         pan[col].fillna(method='ffill', axis=1, inplace=True)
 
     df = pan.to_frame(filter_observations=False)
-
-    # Drop if Don't Know whether filed (all other bank vars are missing)
-    df = df[df['bank_filed'].notnull()].copy()
-
-    # Drop if not actually in the sample (by seq_num)
-    df = df[df['sequence_number'] < 70].copy()
 
     return df
 

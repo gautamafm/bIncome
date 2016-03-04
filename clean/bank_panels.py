@@ -17,8 +17,7 @@ def load_nonbankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
                            )
         return df
 
-    df = load_full_panel(_rebuild=_rebuild_down).reset_index('year')
-    df = df.query('sequence_number != 0').copy()
+    df = uniform_cleaning(_rebuild_down=_rebuild_down)
     df = df.query('bank_filed == 0').copy()
 
     return df
@@ -35,14 +34,14 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
                            )
         return df
 
-    df = load_full_panel(_rebuild=_rebuild_down).reset_index('year')
-    df = df.query('sequence_number != 0').copy()
     df = df.query('bank_filed == 1').copy()
 
     df['event_year'] = df['year'] - df['bank_year']
+
     # Restrict to "head or wife in year of bankruptcy"
-    flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
+    df = _flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
     df = df[df[['bank_is_head', 'bank_is_wife']].max(axis=1)].copy()
+
     # Restrict to "age>28 at bankruptcy"
     age28 = df.loc[df['event_year'] == 0, 'age'] >= 28
     df = df.join(age28.to_frame('age28'))
@@ -50,12 +49,12 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
     df.drop('age28', axis=1, inplace=True)
 
     # Restrict to filling years after 1985
-    df = df.query('bank_year >= 1985').copy()
+    df = df.query('1985 <= bank_year').copy()
 
     return df
 
-
-def flag_bankyear_couple(df):
+def _flag_bankyear_couple(df):      #noqa
+    """ Create flags for 'is head/wife in filing year """
     df['temp'] = (
         (df['event_year'] == 0) &
         (df['relhead'] == 'head') &
@@ -76,6 +75,25 @@ def flag_bankyear_couple(df):
                                     axis=0)['temp'].transform('max')
     df.drop('temp', axis=1, inplace=True)
 
+    return df
+
+
+def uniform_cleaning(_rebuild_down=False):
+    """ Basic cleaning for both bankrupt and non-bankrupt panels """
+    df = load_full_panel(_rebuild=_rebuild_down).reset_index('year')
+    # Drop if person not interviewed in this year
+    df = df.query('sequence_number != 0').copy()
+    # Drop if Don't Know whether filed (all other bank vars are missing)
+    df = df[df['bank_filed'].notnull()].copy()
+    # Drop if not actually in the sample (by seq_num)
+    df = df[df['sequence_number'] < 70].copy()
+    # Create total food exp. variable
+    df['food_tot'] = df[['food_stamps', 'food_home', 'food_out']].sum(axis=1)
+
+    return df
+
 
 if __name__ == '__main__':
-    pass
+    # Keep this here to easily create the DTA files
+    bank = load_bankrupt_panel(_rebuild=True)
+    nonbank = load_nonbankrupt_panel(_rebuild=True)
