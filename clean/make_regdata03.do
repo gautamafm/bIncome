@@ -3,19 +3,39 @@ set more off
 
 run util/env.do
 
-use $DATA_PATH/bankruptpeople1
-gen byte B=1
+use $DATA_PATH/bankruptpeople2
 
-append using $DATA_PATH/nonbankpeople1
-replace B=0 if B==.
+append using $DATA_PATH/nonbankruptpeople2
+
+rename samp_weight oldwt
+rename person_id id
+rename event_year eventyr
+rename interview_number match
+rename tot_fam_income inc
+rename rent_pay rentmo
+rename mortgage_pay mortmo
+rename food_tot foodtot
+rename food_out foodouttot
+rename mortgage_balance mortpri
+rename home_value hvalue
+ren male_head malehead
+gen head = (relhead == "head") & inlist(sequence_number, 10, 1)
+gen spouse = relhead == "wife"
+
+gen married = mrstat == "m"
+gen divorced = mrstat == "d"
+
+gen capita = inc / famsize
+
+gen B = bank_filed
+assert bank_filed != .
+
 compress
-replace inc=. if inlist(year,2003,2005,2007)  // 2014 is this still a good idea?
 xtset id year
 
 /******************************************************/
 // since all of our sample is present in 1996, we
 //   will use 1996 weights throughout
-rename wt oldwt
 gen wt = oldwt if year == 1996
 bys id (wt): replace wt = wt[1] // only one nonmissing per person 
 xtset  // reset the order
@@ -46,13 +66,10 @@ replace educ2 = . if educ2==0
 gen educmissing = inlist(educ,0,98,99) | educ==.
 
 // marital stuff
-gen malehead = sexofhead==1
-gen homeowner = hometype==1
-gen head = relhead == 1 | relhead==10
-gen spouse = relhead == 2 | relhead==20
 
 // gen unmarried = l.married==1 & married==0  if mrstat<. & head & age>18 & l.mrstat<.
-gen unmarried = l.married==1 & married==0  if mrstat<.  & l.mrstat<.
+bys id (year): gen l_mrstat = mrstat[_n - 1]
+gen unmarried = l.married==1 & married==0  if mrstat != ""  & l_mrstat != ""
 gen divorce_now = l.married==1 & divorced==1
 
 
