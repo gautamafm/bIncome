@@ -1,5 +1,6 @@
 clear all
 set more off
+set trace off
 
 run util/env.do
 
@@ -88,7 +89,7 @@ forval year = 1975(1)1986 {
 	gen time = eventyr if B
 	replace Bwtlife`year' = wt if B
 	replace time = year -`year' -10  if !B	
-	// table B time if abs(time)<12 [aw=Bwtlife`year'] , c( mean heademp mean unmarried p50 inc p40 inc p30 inc) replace name(alt)
+	table B time if abs(time)<12 [aw=Bwtlife`year'] , c(mean heademp mean unmarried p50 inc p40 inc p30 inc) replace name(alt)
 	gen Btot = `Btot'
 	gen year = `year'
 	rename alt1 unemployed

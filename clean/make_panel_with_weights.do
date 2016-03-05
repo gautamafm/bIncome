@@ -18,6 +18,7 @@ rename food_tot foodtot
 rename food_out foodouttot
 rename mortgage_balance mortpri
 rename home_value hvalue
+rename head_unemploy heademp
 ren male_head malehead
 
 gen head = (relhead == "head") & inlist(sequence_number, 10, 1)
