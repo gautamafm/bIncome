@@ -13,7 +13,7 @@ rename event_year eventyr
 rename interview_number match
 rename tot_fam_income inc
 rename rent_pay rentmo
-rename mortgage_pay mortmo
+rename mortgage_pay mort
 rename food_tot foodtot
 rename food_out foodouttot
 rename mortgage_balance mortpri
@@ -205,10 +205,10 @@ gen byte B10 = B & eventyr==-10 if inc3<. & f10.inc3<. & year<=1986 & hhtag2==1
 
 /******************************************************/
 // HOUSING
-// rent rentmo mort mortmo foodout
+// rent rentmo mort mort foodout
 /******************************************************/
 replace rent = cond(year<=1993,rent/12,rentmo, .)
-replace mort = cond(year<=1993,mort/12,mortmo, .)
+replace mort = cond(year<=1993,mort/12,mort, .)
 replace foodouttot = cond(year<1992,foodouttot/12,foodouttot, .)
 replace foodtot = cond(year<1992,foodtot/12,foodtot, .)
 
@@ -229,7 +229,7 @@ gen heq_ratio = heq/hvalue
 
 av3 housing foodout foodtot
 
-gen lfoodout3 = ln(foodout3) 
+gen lfoodout3 = ln(foodouttot3) 
 gen lhousing3= ln(housing3) 
 gen lcons3 = ln(foodtot3 + housing3) 
 gen lsaving3 = linc3 - lcons3

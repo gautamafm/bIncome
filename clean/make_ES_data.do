@@ -28,7 +28,7 @@ save $DATA_PATH/altshock01, replace
 use $DATA_PATH/regdata03
 
 gen foodpercap = foodtot/famsize
-// gen fracfoodout = foodouttot/foodtot
+gen fracfoodout = foodouttot/foodtot
 
 //  make a stat list 
 local C  housing mort rent fracfoodout foodpercap foodouttot foodtot mortpri hvalue heq heq_ratio
