@@ -34,6 +34,7 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
                            )
         return df
 
+    df = uniform_cleaning(_rebuild_down=_rebuild_down)
     df = df.query('bank_filed == 1').copy()
 
     df['event_year'] = df['year'] - df['bank_year']
@@ -63,8 +64,8 @@ def _flag_bankyear_couple(df):      #noqa
     df['bank_is_head'] = df.groupby(level='person_id',
                                     axis=0)['temp'].transform('max')
     # Get 'wife' (not always `sequence_number = 2`, but wife is unique w/in
-    # `interview_number` up to a couple coding errors that should be outside the
-    # sample)
+    # `interview_number` up to a couple coding errors that should be outside
+    # the sample)
     df['temp'] = (
         (df['event_year'] == 0) &
         (df['relhead'] == 'wife') &
