@@ -14,9 +14,9 @@ graph set eps fontface times
 prog def pre_fig_prep
     global consumption_vars housing foodtot  foodouttot famsize  heq  // mort hvalue  mortpri heq_ratio   rent homeowner  
 
-    /* incdist01 is an observation for each time period (-10 to 10) for each
+    /* ESpanel_by_income_bin is an observation for each time period (-10 to 10) for each
        income bin 2-6 plus bankrupt */
-    use $DATA_PATH/incdist01, clear
+    use $DATA_PATH/ESpanel_by_income_bin, clear
     cap drop temp
     drop if time == .
 
@@ -170,7 +170,7 @@ prog def _floater_code
 end
 
 prog def plot_divorce_unemp
-    use $DATA_PATH/altshock01, replace
+    use $DATA_PATH/ESpanel_by_income_bin_alt, replace
 
     /* XXX Begin redundancy with `pre_fig_prep` */
     cap drop temp

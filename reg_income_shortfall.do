@@ -20,7 +20,7 @@ graph set eps mag 195
 graph set eps fontface times
 
 
-use $DATA_PATH/regdata03, replace
+use $DATA_PATH/panel_with_weights, replace
 keep if year<=1995
 gen byte B0 = B & eventyr==0 if inc3<.  & year<=1996 & hhtag2==1
 replace ld310 = min(max(-3,ld310),1) if ld310<.

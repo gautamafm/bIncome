@@ -20,12 +20,10 @@ run util/env.do
 
 
 // make fake datasets to append results to
-set obs 1
-gen temp = 0
-save $DATA_PATH/incdist01, replace
-save $DATA_PATH/altshock01, replace
+save $DATA_PATH/ESpanel_by_income_bin, replace empty
+save $DATA_PATH/ESpanel_by_income_bin_alt, replace empty
 
-use $DATA_PATH/regdata03
+use $DATA_PATH/panel_with_weights, clear
 
 gen foodpercap = foodtot/famsize
 gen fracfoodout = foodouttot/foodtot
@@ -81,8 +79,8 @@ forval year = 1975(1)1986 {
 	rename temp_incbin incbin
 	gen Btot = `Btot'
 	gen year = `year'	
-	append using $DATA_PATH/incdist01
-	save $DATA_PATH/incdist01 , replace
+	append using $DATA_PATH/ESpanel_by_income_bin
+	save $DATA_PATH/ESpanel_by_income_bin , replace
 	restore
 
 // unemployment and marriage series
@@ -90,7 +88,7 @@ forval year = 1975(1)1986 {
 	gen time = eventyr if B
 	replace Bwtlife`year' = wt if B
 	replace time = year -`year' -10  if !B	
-	table B time if abs(time)<12 [aw=Bwtlife`year'] , c( mean heademp mean unmarried p50 inc p40 inc p30 inc) replace name(alt)
+	// table B time if abs(time)<12 [aw=Bwtlife`year'] , c( mean heademp mean unmarried p50 inc p40 inc p30 inc) replace name(alt)
 	gen Btot = `Btot'
 	gen year = `year'
 	rename alt1 unemployed
@@ -98,8 +96,8 @@ forval year = 1975(1)1986 {
 	rename alt3 inc_50
 	rename alt4 inc_40
 	rename alt5 inc_30
-	append using $DATA_PATH/altshock01
-	save $DATA_PATH/altshock01 , replace
+	append using $DATA_PATH/ESpanel_by_income_bin_alt
+	save $DATA_PATH/ESpanel_by_income_bin_alt , replace
 	restore
 
 	/*
