@@ -185,8 +185,9 @@ replace Bwt = 0 if Bwt==.
 // make a variable that gets one person per household, preferably the head
 // 2014 does this work?  I am not sure it does
 /*
-XXX This is not going to work for bankrupt households, and will not provide a
-balanced peer sample since we're keeping heads *and* spouses of the bankrupt
+XXX This is not going to work for bankrupt households going back, and may not
+provide a balanced peer sample since we're keeping heads *and* spouses of the
+bankrupt
 */
 asdf
 bys B match year (head spouse): gen hhtag2 = _n==_N if match!=.

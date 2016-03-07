@@ -62,7 +62,7 @@ forval year = 1975(1)1986 {
 	gen incbin`year' = 1 + floor(9.9999*trash) if inc3<. & !B & year ==`year'  // makes ten income buckets
 	drop temp tempwt trash
 	// the above only assigns a value in the current year
-    // assigns the one nonmissing temp incbin across all person's observations	
+        // assigns the one nonmissing temp incbin across all person's observations	
 	bys id (incbin`year') : gen temp_incbin = incbin`year'[1] 
 	di " year = `year' "	
 
@@ -76,7 +76,6 @@ forval year = 1975(1)1986 {
 
 	collapse famsize homeowner `C_mean' (median) inc1 = inc `C' if abs(time)<11  [aw=Bwtlife`year'] , by(time temp_incbin)
 	
-// 	table time temp_incbin if abs(time)<12 [aw=Bwtlife`year'] , c( p50 inc ) replace name(inc)
 	rename temp_incbin incbin
 	gen Btot = `Btot'
 	gen year = `year'	

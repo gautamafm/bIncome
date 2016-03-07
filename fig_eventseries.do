@@ -186,7 +186,8 @@ prog def plot_divorce_unemp
     reshape wide unemp unmarried , j(B) i(time)
 
     /* XXX End redundancy
-       Only changes are varnames and dataset
+       Only changes are varnames and dataset, but we haven't been using these
+       figures anyway so I'm not going to take the time to make it all work.
     */
 
     label var unemployed0 "Peer Population"
@@ -220,7 +221,8 @@ prog def plot_divorce_unemp
 end
 
 pre_fig_prep
+// plot_income_es_bank_only
 plot_income_es
 plot_simulated_debt
 plot_consumption_vars
-
+plot_divorce_unemp
