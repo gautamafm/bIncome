@@ -110,7 +110,8 @@ def uniform_cleaning(_rebuild_down=False):
                  on=['interview_number', 'year'], how='left')
     del heads_unemp
     #   Total food exp.
-    df['food_tot'] = df[['food_stamps', 'food_home', 'food_out']].sum(axis=1)
+    food_vars = ['food_stamps', 'food_home', 'food_out']
+    df['food_tot'] = df[food_vars].sum(axis=1, skipna=False)
     #   Married, etc.
     df['married'] = (df['mrstat'] == 'm').astype(int)
     df['divorced'] = (df['mrstat'] == 'd').astype(int)
