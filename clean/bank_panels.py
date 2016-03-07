@@ -114,14 +114,7 @@ def uniform_cleaning(_rebuild_down=False):
     #   Married, etc.
     df['married'] = (df['mrstat'] == 'm').astype(int)
     df['divorced'] = (df['mrstat'] == 'd').astype(int)
-    df.sort_values(['person_id', 'year'], inplace=True)
-    df['mrstat_last'] = df.groupby('person_id')['mrstat'].apply(
-        lambda x: x.shift())
-    df['separated_recent'] = (
-        (df['mrstat'] != 'm') & (df['mrstat_last'] == 'm')).astype(int)
-    df.loc[df['mrstat'].isnull(),
-           ['married', 'divorced', 'separated_recent']] = np.nan
-    df.loc[df['mrstat_last'].isnull(), 'separated_recent'] = np.nan
+    df.loc[df['mrstat'].isnull(), ['married', 'divorced']] = np.nan
 
     return df.set_index('person_id')
 
