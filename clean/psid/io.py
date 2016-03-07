@@ -4,7 +4,7 @@ from os.path import join
 
 import pandas as pd
 
-from econtools import load_or_build, force_iterable
+from econtools import load_or_build, loadbuild_cli, force_iterable
 
 from util import src_path, data_path
 from clean.psid.codebook import family_std, indiv_std
@@ -173,4 +173,5 @@ def _deflate_CPI(df, dollar_cols):
 
 
 if __name__ == '__main__':
-    df = load_full_panel(_rebuild=True)
+    rebuild, rebuild_down = loadbuild_cli()
+    df = load_full_panel(_rebuild=rebuild, _rebuild_down=rebuild_down)
