@@ -15,12 +15,6 @@ run util/env.do
 
 cap log close
 
-set scheme s2manual
-graph set eps logo off 
-graph set eps mag 195
-graph set eps fontface times
-
-
 use $DATA_PATH/panel_with_weights, replace
 keep if year<=1995
 gen byte B0 = B & eventyr==0 if inc3<.  & year<=1996 & hhtag2==1
