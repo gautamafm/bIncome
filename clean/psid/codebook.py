@@ -1334,7 +1334,7 @@ class other_vars(object):
 
         return varcode, codebook, year_diff
 
-    def samp_weight(self):
+    def hhold_weight(self):
         varcode = {
             2007: 'ER41069',
             2005: 'ER28078',

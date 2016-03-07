@@ -7,7 +7,8 @@ use $DATA_PATH/bankruptpeople2
 
 append using $DATA_PATH/nonbankruptpeople2
 
-rename samp_weight oldwt
+/* Rename new PSID data to fit old code */
+rename hhold_weight 
 rename person_id id
 rename event_year eventyr
 rename interview_number match
@@ -21,12 +22,6 @@ rename home_value hvalue
 rename head_unemploy heademp
 ren male_head malehead
 
-gen head = (relhead == "head") & inlist(sequence_number, 10, 1)
-gen spouse = relhead == "wife"
-
-gen married = mrstat == "m"
-gen divorced = mrstat == "d"
-
 gen capita = inc / famsize
 
 gen B = bank_filed
@@ -38,6 +33,7 @@ xtset id year
 /******************************************************/
 // since all of our sample is present in 1996, we
 //   will use 1996 weights throughout
+ren hhold_weight oldwt
 gen wt = oldwt if year == 1996
 bys id (wt): replace wt = wt[1] // only one nonmissing per person 
 xtset  // reset the order
