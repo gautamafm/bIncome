@@ -1,6 +1,6 @@
 import re
 
-dpa_path = 'clean/dataprep_a.do'
+dpa_path = 'scripts/dataprep_a.do'
 out_path = 'scripts/varcode_dicts.txt'
 
 varnames = (
@@ -15,6 +15,8 @@ varnames = (
     'headlabor',
     'mrstat',
     'wifelabor',
+    'heademp',
+    'wifeemploy',
     'numchild',
     'mortmo',
     'mort',
@@ -44,8 +46,9 @@ with open(dpa_path, 'r') as f, open(out_path, 'w') as out:
         out.write("#{}\nvarcode = {{\n".format(varname))
         for line in f:
             # Match, get subgroups
-            m = re.match('rename ([ERV]{{1,2}}\d+) {}(\d{{4}})'.format(varname),
-                         line)
+            m = re.match(
+                'rename ([ERV]{{1,2}}\d+) {}(\d{{4}})'.format(varname),
+                line)
             if m:
                 varcode, year = m.group(1), m.group(2)
                 out.write("    {}: '{}',\n".format(year, varcode))

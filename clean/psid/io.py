@@ -4,7 +4,7 @@ from os.path import join
 
 import pandas as pd
 
-from econtools import load_or_build, force_iterable
+from econtools import load_or_build, loadbuild_cli, force_iterable
 
 from util import src_path, data_path
 from clean.psid.codebook import family_std, indiv_std
@@ -124,7 +124,7 @@ def load_family_year(year, _load=True, _rebuild=False):
     df.columns = pd.MultiIndex.from_tuples([(x, -1) for x in df.columns],
                                            names=['varname', 'year'])
     # Loop over variables to clean
-    VARNAMES = ('interview_number', 'samp_weight', 'state', 'male_head',
+    VARNAMES = ('interview_number', 'hhold_weight', 'state', 'male_head',
                 'headrace', 'famsize', 'numchild', 'mrstat', 'tot_fam_income',
                 'headlabor', 'wifelabor', 'homeowner', 'home_value',
                 'food_stamps', 'food_home', 'food_out', 'mortgage_pay',
@@ -173,4 +173,5 @@ def _deflate_CPI(df, dollar_cols):
 
 
 if __name__ == '__main__':
-    df = load_full_panel(_rebuild=True)
+    rebuild, rebuild_down = loadbuild_cli()
+    df = load_full_panel(_rebuild=rebuild, _rebuild_down=rebuild_down)

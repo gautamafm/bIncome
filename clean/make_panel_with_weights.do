@@ -3,19 +3,36 @@ set more off
 
 run util/env.do
 
-use $DATA_PATH/bankruptpeople1
-gen byte B=1
+use $DATA_PATH/bankruptpeople2
 
-append using $DATA_PATH/nonbankpeople1
-replace B=0 if B==.
+append using $DATA_PATH/nonbankruptpeople2
+
+/* Rename new PSID data to fit old code */
+rename person_id id
+rename event_year eventyr
+rename interview_number match
+rename tot_fam_income inc
+rename rent_pay rentmo
+rename mortgage_pay mort
+rename food_tot foodtot
+rename food_out foodouttot
+rename mortgage_balance mortpri
+rename home_value hvalue
+rename head_unemploy heademp
+ren male_head malehead
+
+gen capita = inc / famsize
+
+gen B = bank_filed
+assert bank_filed != .
+
 compress
-replace inc=. if inlist(year,2003,2005,2007)  // 2014 is this still a good idea?
 xtset id year
 
 /******************************************************/
 // since all of our sample is present in 1996, we
 //   will use 1996 weights throughout
-rename wt oldwt
+ren hhold_weight oldwt
 gen wt = oldwt if year == 1996
 bys id (wt): replace wt = wt[1] // only one nonmissing per person 
 xtset  // reset the order
@@ -29,12 +46,8 @@ egen age2 = cut(age) , at(0,13,18,25,30,35,40,50,120)
 gen agesq = age*age
 gen yearsq = year* year
 
-// duplicates
-duplicates drop id year, force
-
-
 // make final education in bins -- educ2
-replace educ = 0 if educ==98 | educ ==99 | educ==.
+replace educ = 0 if educ==.
 bys id: egen educ2 = max(educ)  // final level of education
 replace educ = educ2 if educ==0 & age>=24 
 
@@ -43,18 +56,15 @@ replace educ2 = 14 if inrange(educ2,13,15)  // clump schooling
 replace educ2 = 16 if educ2>=16 & educ2<.
 replace educ2 = . if educ2==0
 
-gen educmissing = inlist(educ,0,98,99) | educ==.
+gen educmissing = educ==.
 
 // marital stuff
-gen malehead = sexofhead==1
-gen homeowner = hometype==1
-gen head = relhead == 1 | relhead==10
-gen spouse = relhead == 2 | relhead==20
-
 // gen unmarried = l.married==1 & married==0  if mrstat<. & head & age>18 & l.mrstat<.
-gen unmarried = l.married==1 & married==0  if mrstat<.  & l.mrstat<.
+bys id (year): gen l_mrstat = mrstat[_n - 1]
+gen unmarried = l.married==1 & married==0  if mrstat != ""  & l_mrstat != ""
 gen divorce_now = l.married==1 & divorced==1
 
+replace famsize = round(famsize)  // round this for convenience
 
 // income
 // 2015 I need to censor incomes that are too low or high
@@ -100,19 +110,16 @@ end
 /******************************************************/
 
 
-
-
 //  make average
 av3 inc
 gen linc3 = ln(inc3)
 
-replace famsize = round(famsize)  // round this for convenience
-gen bigwt  = round(100*wt)
+/*
+    Calc long differences in income
+    Used by `reg_income_shortfall.do`
+*/
 
 
-
-
-// make a big d10 and then make smaller d's for everyone and all times
 //  2014 -- restrict the d's to be before 96 by the right number of years
 gen d10 = f10.inc - inc if (eventyr==-10 & B )	|  ( !B & year<=1986)
 gen d5 = f5.inc - inc if (eventyr<=-5 & B )	|  ( !B & year<=1991)
@@ -177,6 +184,11 @@ replace Bwt = 0 if Bwt==.
 
 // make a variable that gets one person per household, preferably the head
 // 2014 does this work?  I am not sure it does
+/*
+XXX This is not going to work for bankrupt households, and will not provide a
+balanced peer sample since we're keeping heads *and* spouses of the bankrupt
+*/
+asdf
 bys B match year (head spouse): gen hhtag2 = _n==_N if match!=.
 
 
@@ -188,12 +200,8 @@ gen byte B10 = B & eventyr==-10 if inc3<. & f10.inc3<. & year<=1986 & hhtag2==1
 
 /******************************************************/
 // HOUSING
-// rent rentmo mort mortmo foodout
+// rent rentmo mort mort foodout
 /******************************************************/
-replace rent = cond(year<=1993,rent/12,rentmo, .)
-replace mort = cond(year<=1993,mort/12,mortmo, .)
-replace foodouttot = cond(year<1992,foodouttot/12,foodouttot, .)
-replace foodtot = cond(year<1992,foodtot/12,foodtot, .)
 
 // drop a couple outliers
 foreach var of varlist rent mort foodouttot foodtot {
@@ -202,8 +210,12 @@ foreach var of varlist rent mort foodouttot foodtot {
 
 replace rent =. if rent < 50
 replace mort =. if mort<50
-egen housing = rsum(rent mort)
-replace housing =. if housing==0 | year ==1982 
+egen housing = rowtotal(rent mort), missing
+replace housing = . if housing==0 | inlist(year, ///
+                                           1982, ///  `mortgage_pay` not collected
+                                           1987, ///  `rent_pay` not collected
+                                           1988, ///  both not collected
+                                           1989) //   both not collected
 replace mortpri = . if mortpri==0
 replace hvalue = . if hvalue==0
 
@@ -212,92 +224,25 @@ gen heq_ratio = heq/hvalue
 
 av3 housing foodout foodtot
 
-gen lfoodout3 = ln(foodout3) 
+gen lfoodout3 = ln(foodouttot3) 
 gen lhousing3= ln(housing3) 
 gen lcons3 = ln(foodtot3 + housing3) 
 gen lsaving3 = linc3 - lcons3
 qui summ lsaving
- drop if abs(lsaving- r(mean))/r(sd)>3 // this normalizes cons as well as savings
+drop if abs(lsaving- r(mean))/r(sd)>3 // this normalizes cons as well as savings
 /******************************************************/
 
 xtset
 gen t = year - 1975
 
-/*
-/******************************************************/
-// grab the worst year and the number of years that are negative
-/******************************************************/
-cap drop trash
-gen trash = inc<.
-gen byte worstyear=.
-forval i = 1(1)10 {
-	local i1 = `i'-1
-	bys id (year): replace worstyear = `i' if mind1==f`i1'.d1 & worstyear==.
-	bys id (year): gen byte neg0k`i' = f`i1'.d1<0  if f`i1'.d1<.   // only count if inc is there
-	
-	bys id (year): gen byte neg5k`i' = f`i1'.d1<-5000  if f`i1'.d1<.   // only count if inc is there
-	bys id (year): gen byte pos5k`i' = f`i1'.d1>5000  if f`i1'.d1<.   // only count if inc is there	
-
-	bys id (year): gen byte neg15k`i' = f`i1'.d1<-15000  if f`i1'.d1<.   // only count if inc is there
-	bys id (year): gen byte pos15k`i' = f`i1'.d1>15000  if f`i1'.d1<.   // only count if inc is there	
-	
-}		
-
-
-// histogram worstyear [aw=Bwt] if eventyr==-10 | !B  , discrete 
-
-summ neg0k* [aw=Bwt] if B==0
-
-graph bar neg0k* [w=wt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with Negative Income Shock) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with Negative Income Shocks) subtitle(Before Bankruptcy) yline(.46 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(neg0k, replace)
-graph export neg0k.eps, replace
-
-
-summ neg5k* [aw=Bwt] if B==0 & inrange(year, 1975,1985)
-
-graph bar neg5k* [w=Bwt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with $5K Income Drop) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with $5000 Income Drop In One Year) subtitle(Before Bankruptcy) yline(.30 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(neg5k, replace)
-graph export neg5k.eps, replace
-
-
-summ neg15k* [aw=Bwt] if B==0 & inrange(year, 1975,1985)
-
-graph bar neg15k* [w=Bwt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with $15K Income Drop) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with $15000 Income Drop In One Year) subtitle(Before Bankruptcy) yline(.155 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(neg15k, replace)
-graph export neg15k.eps, replace
-
-
-summ pos5k* [aw=Bwt] if B==0 & inrange(year, 1975,1985)
-
-graph bar pos5k* [w=Bwt] if eventyr==-10 & hhtag,  ascategory ytitle(Fraction with $5K Income Increase) b1title(Years Before Filing)  yvaroptions( relabel(1 "-9" 2 "-8" 3 "-7" 4 "-6" 5 "-5" 6 "-4" 7 "-3" 8 "-2" 9 "-1" 10 "0")) title(Filers with $5000 Income Increase In One Year) subtitle(Before Bankruptcy) yline(.36 , lpattern(dash) lwidth(medium)  ) blabel(bar , format(%6.2g) pos(inside) ) intensity(50) name(pos5k, replace)
-graph export pos5k.eps, replace
-*/
-
-
-
-// make ten year averages
-
-/*
-foreach var of varlist t inc linc housing foodouttot foodtot famsize {
-	cap drop trash
-	gen trash = `var'<.
-	gen av`var'10 = cond(trash==1,`var',0)
-	forval i = 1(1)10 {
-		local i1 = `i'-1
-		bys id (year): replace trash = trash+1 if f`i'.inc<. & f`i'.`var'<.   // only count if inc is there
-		bys id (year): replace av`var'10 = av`var'10 + f`i'.`var' if f`i'.`var'<. & f`i'.inc<.
-
-		}
-	replace av`var'10 = av`var'10/trash
-	cap drop trash
-}
-*/
-
 // makes averages
 av10 t inc linc housing foodouttot foodtot famsize
 
-	gen lfamsize = ln(avfamsize)
+gen lfamsize = ln(avfamsize)
 
 	// how do I deal with missing years?
 
 
 compress
 xtset
-saveold $DATA_PATH/regdata03, replace
+saveold $DATA_PATH/panel_with_weights, replace

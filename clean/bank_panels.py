@@ -1,5 +1,7 @@
 from __future__ import division, print_function
 
+import numpy as np
+
 from econtools import load_or_build
 
 from util import data_path
@@ -81,17 +83,40 @@ def _flag_bankyear_couple(df):      #noqa
 
 def uniform_cleaning(_rebuild_down=False):
     """ Basic cleaning for both bankrupt and non-bankrupt panels """
-    df = load_full_panel(_rebuild=_rebuild_down).reset_index('year')
+    df = load_full_panel(_rebuild=_rebuild_down).reset_index()
+
+    # # Restrict sample
     # Drop if person not interviewed in this year
     df = df.query('sequence_number != 0').copy()
     # Drop if Don't Know whether filed (all other bank vars are missing)
     df = df[df['bank_filed'].notnull()].copy()
     # Drop if not actually in the sample (by seq_num)
     df = df[df['sequence_number'] < 70].copy()
-    # Create total food exp. variable
-    df['food_tot'] = df[['food_stamps', 'food_home', 'food_out']].sum(axis=1)
 
-    return df
+    # # Create variables
+    #   Current-year `head` and `spouse`
+    df['head'] = (df['relhead'] == 'head') & (df['sequence_number'] == 1)
+    df['spouse'] = (df['relhead'] == 'wife')
+    #   Unemployed
+    df['unemployed'] = (df['employ'] == 'unemployed').astype(int)
+    emp_miss = df['employ'] == ''
+    df.loc[emp_miss.values, 'unemployed'] = np.nan
+    #   Hhold-level unemployment variables
+    heads_unemp = df.set_index(['interview_number', 'year'])
+    heads_unemp = heads_unemp.loc[heads_unemp['head'].values,
+                                  'unemployed'].squeeze().copy()
+    df.reset_index(inplace=True)
+    df = df.join(heads_unemp.to_frame('head_unemploy'),
+                 on=['interview_number', 'year'], how='left')
+    del heads_unemp
+    #   Total food exp.
+    df['food_tot'] = df[['food_stamps', 'food_home', 'food_out']].sum(axis=1)
+    #   Married, etc.
+    df['married'] = (df['mrstat'] == 'm').astype(int)
+    df['divorced'] = (df['mrstat'] == 'd').astype(int)
+    df.loc[df['mrstat'].isnull(), ['married', 'divorced']] = np.nan
+
+    return df.set_index('person_id')
 
 
 if __name__ == '__main__':

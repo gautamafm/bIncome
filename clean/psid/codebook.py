@@ -111,8 +111,8 @@ class indiv_std(object):
         year_diff = 0
         # Use this codebook to create `sequence_number_label` or something
         codebook = {
-            0: '',      # Latino sample, family nonresponse by `survey_year`, or
-                        # moved out before last `survey_year
+            0: '',      # Latino sample, family nonresponse by `survey_year`,
+                        # or moved out before last `survey_year
         }
         codebook.update({x: 'family' for x in range(1, 20 + 1)})
         codebook.update({x: 'instit' for x in range(51, 59 + 1)})
@@ -165,9 +165,9 @@ class indiv_std(object):
         year_diff = 0
         codebook = {
             0: np.nan,  # Inap.; latino sample, not born yet, mover out,
-                        #       head/wife, did not stop school
-            17: 16,     # Some variables allows `17: some postgrad` while others
-                        #   recode 17 to 16. See doc for ER30197.
+                        #   head/wife, did not stop school
+            17: 16,     # Some variables allows `17: some postgrad` while
+                        #   others recode 17 to 16. See doc for ER30197.
             18: np.nan,  # Wild (1997)
             98: np.nan,  # DK
             99: np.nan,  # DK/NA
@@ -689,7 +689,8 @@ class super_food_home_out(object):
             all_cols = df[list(varcode)].replace(codebook)
             # Scale to year, sum
             scale_to_year = df[list(period_varcodes)].replace(period_codebook)
-            df[col_index] = (all_cols.values * scale_to_year.values).sum(axis=1)
+            df[col_index] = (all_cols.values *
+                             scale_to_year.values).sum(axis=1)
 
 
 class food_home(super_food_home_out):
@@ -701,8 +702,8 @@ class food_home(super_food_home_out):
         4) food delivered (person on food stamps)
     From 1994 on, these are 4 separate variables
 
-    NOTE: Method `std` inherited from `super_food_home_out` and `varname` set by
-        `__init__`.
+    NOTE: Method `std` inherited from `super_food_home_out` and `varname` set
+        by `__init__`.
     """
     def __init__(self):
         self.varname = 'food_home'
@@ -880,8 +881,8 @@ class food_out(super_food_home_out):
     From 1994 on, there are two mutually exclusive variables, one for people
         who used food stamps and one for those you didn't.
 
-    NOTE: Method `std` inherited from `super_food_home_out` and `varname` set by
-        `__init__`.
+    NOTE: Method `std` inherited from `super_food_home_out` and `varname` set
+        by `__init__`.
     """
 
     def __init__(self):
@@ -1333,7 +1334,7 @@ class other_vars(object):
 
         return varcode, codebook, year_diff
 
-    def samp_weight(self):
+    def hhold_weight(self):
         varcode = {
             2007: 'ER41069',
             2005: 'ER28078',
@@ -1841,6 +1842,43 @@ class other_vars(object):
             codebook = {
                 99999: np.nan,          # top code
             }
+
+        return varcode, codebook, year_diff
+
+    def head_unemp(self):
+        varcode = {
+            2001: 'ER17353',
+            1999: 'ER13330',
+            1997: 'ER10199',
+            1996: 'ER7283',
+            1995: 'ER5187',
+            1994: 'ER2188',
+            1993: 'V22569',
+            1992: 'V20792',
+            1991: 'V19492',
+            1990: 'V18192',
+            1989: 'V16754',
+            1988: 'V15253',
+            1987: 'V14199',
+            1986: 'V13101',
+            1985: 'V11701',
+            1984: 'V10557',
+            1983: 'V9032',
+            1982: 'V8401',
+            1981: 'V7739',
+            1980: 'V7116',
+            1979: 'V6513',
+            1978: 'V5902',
+            1977: 'V5413',
+            1976: 'V4502',
+        }
+        year_diff = -1
+        codebook = {
+            0: 0,       # Not in labor force
+            5: 0,       # No
+            8: np.nan,
+            9: np.nan,
+        }
 
         return varcode, codebook, year_diff
 
