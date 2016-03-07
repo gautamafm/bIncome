@@ -8,7 +8,6 @@ use $DATA_PATH/bankruptpeople2
 append using $DATA_PATH/nonbankruptpeople2
 
 /* Rename new PSID data to fit old code */
-rename hhold_weight 
 rename person_id id
 rename event_year eventyr
 rename interview_number match
@@ -47,12 +46,8 @@ egen age2 = cut(age) , at(0,13,18,25,30,35,40,50,120)
 gen agesq = age*age
 gen yearsq = year* year
 
-// duplicates
-duplicates drop id year, force
-
-
 // make final education in bins -- educ2
-replace educ = 0 if educ==98 | educ ==99 | educ==.
+replace educ = 0 if educ==.
 bys id: egen educ2 = max(educ)  // final level of education
 replace educ = educ2 if educ==0 & age>=24 
 
@@ -61,15 +56,15 @@ replace educ2 = 14 if inrange(educ2,13,15)  // clump schooling
 replace educ2 = 16 if educ2>=16 & educ2<.
 replace educ2 = . if educ2==0
 
-gen educmissing = inlist(educ,0,98,99) | educ==.
+gen educmissing = educ==.
 
 // marital stuff
-
 // gen unmarried = l.married==1 & married==0  if mrstat<. & head & age>18 & l.mrstat<.
 bys id (year): gen l_mrstat = mrstat[_n - 1]
 gen unmarried = l.married==1 & married==0  if mrstat != ""  & l_mrstat != ""
 gen divorce_now = l.married==1 & divorced==1
 
+replace famsize = round(famsize)  // round this for convenience
 
 // income
 // 2015 I need to censor incomes that are too low or high
@@ -115,19 +110,16 @@ end
 /******************************************************/
 
 
-
-
 //  make average
 av3 inc
 gen linc3 = ln(inc3)
 
-replace famsize = round(famsize)  // round this for convenience
-gen bigwt  = round(100*wt)
+/*
+    Calc long differences in income
+    Used by `reg_income_shortfall.do`
+*/
 
 
-
-
-// make a big d10 and then make smaller d's for everyone and all times
 //  2014 -- restrict the d's to be before 96 by the right number of years
 gen d10 = f10.inc - inc if (eventyr==-10 & B )	|  ( !B & year<=1986)
 gen d5 = f5.inc - inc if (eventyr<=-5 & B )	|  ( !B & year<=1991)
@@ -192,6 +184,11 @@ replace Bwt = 0 if Bwt==.
 
 // make a variable that gets one person per household, preferably the head
 // 2014 does this work?  I am not sure it does
+/*
+XXX This is not going to work for bankrupt households, and will not provide a
+balanced peer sample since we're keeping heads *and* spouses of the bankrupt
+*/
+asdf
 bys B match year (head spouse): gen hhtag2 = _n==_N if match!=.
 
 
@@ -205,10 +202,6 @@ gen byte B10 = B & eventyr==-10 if inc3<. & f10.inc3<. & year<=1986 & hhtag2==1
 // HOUSING
 // rent rentmo mort mort foodout
 /******************************************************/
-replace rent = cond(year<=1993,rent/12,rentmo, .)
-replace mort = cond(year<=1993,mort/12,mort, .)
-replace foodouttot = cond(year<1992,foodouttot/12,foodouttot, .)
-replace foodtot = cond(year<1992,foodtot/12,foodtot, .)
 
 // drop a couple outliers
 foreach var of varlist rent mort foodouttot foodtot {
@@ -217,8 +210,12 @@ foreach var of varlist rent mort foodouttot foodtot {
 
 replace rent =. if rent < 50
 replace mort =. if mort<50
-egen housing = rsum(rent mort)
-replace housing =. if housing==0 | year ==1982 
+egen housing = rowtotal(rent mort), missing
+replace housing = . if housing==0 | inlist(year, ///
+                                           1982, ///  `mortgage_pay` not collected
+                                           1987, ///  `rent_pay` not collected
+                                           1988, ///  both not collected
+                                           1989) //   both not collected
 replace mortpri = . if mortpri==0
 replace hvalue = . if hvalue==0
 
@@ -232,12 +229,11 @@ gen lhousing3= ln(housing3)
 gen lcons3 = ln(foodtot3 + housing3) 
 gen lsaving3 = linc3 - lcons3
 qui summ lsaving
- drop if abs(lsaving- r(mean))/r(sd)>3 // this normalizes cons as well as savings
+drop if abs(lsaving- r(mean))/r(sd)>3 // this normalizes cons as well as savings
 /******************************************************/
 
 xtset
 gen t = year - 1975
-
 
 // makes averages
 av10 t inc linc housing foodouttot foodtot famsize
