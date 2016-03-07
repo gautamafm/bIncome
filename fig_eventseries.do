@@ -5,11 +5,6 @@ set more off
 run util/env.do
 
 cap log close
-// noi cap log using fig_eventseries01 , replace
-set scheme s2manual
-graph set eps logo off 
-graph set eps mag 195
-graph set eps fontface times
 
 prog def pre_fig_prep
     global consumption_vars housing foodtot  foodouttot famsize  heq  // mort hvalue  mortpri heq_ratio   rent homeowner  

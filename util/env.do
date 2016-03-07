@@ -1,4 +1,4 @@
-if regexm(c(pwd), "Google") {
+if regexm(c(pwd), "oogle") {
     global DATA_PATH = "../data"
     global OUT_PATH = "../out"
 }
