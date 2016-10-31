@@ -189,7 +189,6 @@ XXX This is not going to work for bankrupt households going back, and may not
 provide a balanced peer sample since we're keeping heads *and* spouses of the
 bankrupt
 */
-asdf
 bys B match year (head spouse): gen hhtag2 = _n==_N if match!=.
 
 
