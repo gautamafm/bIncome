@@ -15,22 +15,14 @@ BANKVARS = ('bank_filed', 'bank_year', 'bank_state',
             'bank_count', 'bank_debt_filed', 'bank_debt_remained',)
 
 
-def load_full_panel(_load=True, _rebuild=False, _rebuild_down=False):
+@load_or_build(data_path('panel_full.p'))
+def load_full_panel(_rebuild_down=False):
     """
     Create full PSID panel, conditional on being interviewed in 1996.
 
     This does not create any variables or restrict the sample in any way, other
     than starting with 1996 households.
     """
-    if _load:
-        file_path = data_path('panel_full.p')
-        df = load_or_build(file_path,
-                           build=load_full_panel,
-                           force=_rebuild,
-                           bkwargs=dict(_load=False,
-                                        _rebuild_down=_rebuild_down)
-                           )
-        return df
 
     df = load_individual_panel(_rebuild=_rebuild_down)
     df.index.name = 'person_id'
@@ -72,15 +64,8 @@ def load_full_panel(_load=True, _rebuild=False, _rebuild_down=False):
     return df
 
 
-def load_individual_panel(_load=True, _rebuild=False):
-
-    if _load:
-        file_path = data_path('individual_panel_wide.p')
-        df = load_or_build(file_path,
-                           build=load_individual_panel,
-                           force=_rebuild,
-                           bkwargs=dict(_load=False))
-        return df
+@load_or_build(data_path('individual_panel_wide.p'))
+def load_individual_panel():
 
     VARNAMES = ('interview_number', 'sequence_number', 'educ', 'employ',
                 'relhead', 'age', 'yearbirth', 'longweight')
@@ -107,16 +92,8 @@ def load_individual_raw():
     return df
 
 
-def load_family_year(year, _load=True, _rebuild=False):
-
-    if _load:
-        file_path = data_path('newsmall', 'family_{}.p').format(year)
-        df = load_or_build(file_path,
-                           build=load_family_year,
-                           force=_rebuild,
-                           bargs=(year,),
-                           bkwargs=dict(_load=False))
-        return df
+@load_or_build(data_path('newsmall', 'family_{}.p'), path_args=[0])
+def load_family_year(year):
 
     df = load_family_year_raw(year)
     # Add 2nd level to column-index for variable's year

@@ -8,33 +8,16 @@ from util import data_path
 from clean.psid import load_full_panel
 
 
-def load_nonbankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
-    if _load:
-        file_path = data_path('nonbankruptpeople2.dta')
-        df = load_or_build(file_path,
-                           build=load_nonbankrupt_panel,
-                           force=_rebuild,
-                           bkwargs=dict(_load=False,
-                                        _rebuild_down=_rebuild_down)
-                           )
-        return df
+@load_or_build(data_path('nonbankruptpeople2.dta'))
+def load_nonbankrupt_panel(_rebuild_down=False):
 
     df = uniform_cleaning(_rebuild_down=_rebuild_down)
     df = df.query('bank_filed == 0').copy()
 
     return df
 
-
-def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
-    if _load:
-        file_path = data_path('bankruptpeople2.dta')
-        df = load_or_build(file_path,
-                           build=load_bankrupt_panel,
-                           force=_rebuild,
-                           bkwargs=dict(_load=False,
-                                        _rebuild_down=_rebuild_down)
-                           )
-        return df
+@load_or_build(data_path('bankruptpeople2.dta'))
+def load_bankrupt_panel(_rebuild_down=False):
 
     df = uniform_cleaning(_rebuild_down=_rebuild_down)
     df = df.query('bank_filed == 1').copy()
@@ -56,7 +39,7 @@ def load_bankrupt_panel(_load=True, _rebuild=False, _rebuild_down=False):
 
     return df
 
-def _flag_bankyear_couple(df):      #noqa
+def _flag_bankyear_couple(df):
     """ Create flags for 'is head/wife in filing year """
     df['temp'] = (
         (df['event_year'] == 0) &
@@ -71,8 +54,8 @@ def _flag_bankyear_couple(df):      #noqa
     df['temp'] = (
         (df['event_year'] == 0) &
         (df['relhead'] == 'wife') &
-        ((df['sequence_number'] <= 10)      # In the family
-         | (df['sequence_number'] == 51))   # or 'institutionalized'
+        ((df['sequence_number'] <= 10) |    # In the family
+         (df['sequence_number'] == 51))     # or 'institutionalized'
     )
     df['bank_is_wife'] = df.groupby(level='person_id',
                                     axis=0)['temp'].transform('max')
