@@ -228,8 +228,13 @@ gen lfoodout3 = ln(foodouttot3)
 gen lhousing3= ln(housing3) 
 gen lcons3 = ln(foodtot3 + housing3) 
 gen lsaving3 = linc3 - lcons3
-qui summ lsaving
-drop if abs(lsaving- r(mean))/r(sd)>3 // this normalizes cons as well as savings
+// XXX 11/28/2016: This `drop` command drops all years but 1995--1997
+tab year
+summ lsaving
+if 0 {
+    drop if abs(lsaving- r(mean))/r(sd)>3 // this normalizes cons as well as savings
+}
+tab year
 /******************************************************/
 
 xtset
