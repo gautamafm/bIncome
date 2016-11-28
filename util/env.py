@@ -1,8 +1,12 @@
 from os.path import abspath, join
+import platform
 
-DATA_PATH = abspath('d:/data/bIncome')
 OUT_PATH = abspath('../out')
 
+if platform.system() == 'Darwin':       # running on mac so frank machine
+    DATA_PATH = abspath('../data')
+else:
+    DATA_PATH = abspath('d:/data/bIncome')
 
 def data_path(*args):
     return join(DATA_PATH, *args)
