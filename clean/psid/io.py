@@ -32,7 +32,7 @@ def load_full_panel(_rebuild_down=False):
     this_family.index = this_family.pop(match_cols).squeeze().values
     df = df.join(this_family, on=[match_cols], how='inner')
     # Merge all other family years, left
-    for year in range(1975, 1996):
+    for year in range(1975, 1996) + range(1997, 2008, 2):
         match_cols = ('interview_number', year)
         this_family = load_family_year(year, _rebuild=_rebuild_down)
         this_family.index = this_family.pop(match_cols).squeeze().values
