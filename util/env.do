@@ -1,4 +1,4 @@
-if regexm(c(pwd), "oogle") {
+if regexm(c(pwd), "oogle") | c(os) == "MacOSX" {
     global DATA_PATH = "../data"
     global OUT_PATH = "../out"
 }
