@@ -24,15 +24,15 @@ def load_bankrupt_panel(_rebuild_down=False):
 
     df['event_year'] = df['year'] - df['bank_year']
 
-    # Restrict to "head or wife in year of bankruptcy"
+    # Restrict to "head or wife in year of bankruptcy" -- FRANK killed this restriction
     df = _flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
-    df = df[df[['bank_is_head', 'bank_is_wife']].max(axis=1)].copy()
+#   df = df[df[['bank_is_head', 'bank_is_wife']].max(axis=1)].copy()
 
-    # Restrict to "age>28 at bankruptcy"
-    age28 = df.loc[df['event_year'] == 0, 'age'] >= 28
-    df = df.join(age28.to_frame('age28'))
-    df = df[df['age28']].copy()
-    df.drop('age28', axis=1, inplace=True)
+    # Restrict to "age>24 at bankruptcy"  -- changed from 28
+    age24 = df.loc[df['event_year'] == 0, 'age'] >= 24
+    df = df.join(age24.to_frame('age24'))
+    df = df[df['age24']].copy()
+    df.drop('age24', axis=1, inplace=True)
 
     # Restrict to filling years after 1985
     df = df.query('1985 <= bank_year').copy()
@@ -75,6 +75,8 @@ def uniform_cleaning(_rebuild_down=False):
     df = df[df['bank_filed'].notnull()].copy()
     # Drop if not actually in the sample (by seq_num)
     df = df[df['sequence_number'] < 70].copy()
+    # Should add Drop if not head or spouse in 1996?
+
 
     # # Create variables
     #   Current-year `head` and `spouse`
