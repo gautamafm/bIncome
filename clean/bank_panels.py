@@ -69,6 +69,7 @@ def uniform_cleaning(_rebuild_down=False):
     """ Basic cleaning for both bankrupt and non-bankrupt panels """
     df = load_full_panel(_rebuild=_rebuild_down)
 
+    # # Fill in missing data
     # Fill in birth year and age
     yob = _get_yob(df)
     df = df.drop('yearbirth', axis=1)
@@ -77,6 +78,26 @@ def uniform_cleaning(_rebuild_down=False):
     df['age'] = np.where(df['age'].notnull(),
                          df['age'],
                          df['year'] - df['yearbirth'])
+    df = df.set_index('year', append=True).sort_index()
+
+    # Backfill stuff
+    for col in ('educ', 'mrstat'):
+        df[col] = df.groupby(level='person_id')[col].bfill()
+
+    # Backfill columns in off years
+    df = df.sort_index()
+    off_years = [1998, 2000, 2002, 2004, 2006]
+    off_year_slicer = pd.IndexSlice[:, off_years]
+    for col in ('relhead', 'sequence_number',):
+        shift_col = df.groupby(level='person_id')[col].shift(-1)
+        df.loc[off_year_slicer, col] = shift_col.loc[off_year_slicer]
+
+    # Average off-year income
+    on_years = [1997, 1999, 2001, 2003, 2005]
+    on_year_slicer = pd.IndexSlice[:, on_years]
+    grouper = df.groupby(level='person_id')['tot_fam_income']
+    moving_avg = grouper.rolling(window=3, min_periods=2, center=True).mean()
+    df.loc[on_year_slicer, 'tot_fam_income'] = moving_avg.loc[on_year_slicer]
 
     df = df.reset_index()
 
@@ -98,10 +119,9 @@ def uniform_cleaning(_rebuild_down=False):
     emp_miss = df['employ'] == ''
     df.loc[emp_miss.values, 'unemployed'] = np.nan
     #   Hhold-level unemployment variables
-    heads_unemp = df.set_index(['interview_number', 'year'])
-    heads_unemp = heads_unemp.loc[heads_unemp['head'].values,
-                                  'unemployed'].squeeze().copy()
-    df.reset_index(inplace=True)
+    is_head = (df['head']) & (df['interview_number'].notnull())
+    heads_unemp = df[is_head].set_index(['interview_number', 'year'])
+    heads_unemp = heads_unemp['unemployed'].copy()
     df = df.join(heads_unemp.to_frame('head_unemploy'),
                  on=['interview_number', 'year'], how='left')
     del heads_unemp
@@ -113,7 +133,10 @@ def uniform_cleaning(_rebuild_down=False):
     df['divorced'] = (df['mrstat'] == 'd').astype(int)
     df.loc[df['mrstat'].isnull(), ['married', 'divorced']] = np.nan
 
-    df = df.drop('index', axis=1)
+    if 'index' in df.columns:
+        df = df.drop('index', axis=1)
+
+    df = df.reset_index()
 
     return df.set_index('person_id')
 
