@@ -1,6 +1,7 @@
 from __future__ import division, print_function
 
 import numpy as np
+import pandas as pd
 
 from econtools import load_or_build
 
@@ -26,13 +27,13 @@ def load_bankrupt_panel(_rebuild_down=False):
 
     # Restrict to "head or wife in year of bankruptcy"
     df = _flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
-    df = df[df[['bank_is_head', 'bank_is_wife']].max(axis=1)].copy()
+    df = df[df[['head_in_1996', 'wife_in_1996']].max(axis=1)].copy()
 
     # Restrict to "age>28 at bankruptcy"
-    age28 = df.loc[df['event_year'] == 0, 'age'] >= 28
-    df = df.join(age28.to_frame('age28'))
-    df = df[df['age28']].copy()
-    df.drop('age28', axis=1, inplace=True)
+    age_cutoff = df.loc[df['event_year'] == 0, 'age'] >= 24
+    df = df.join(age_cutoff.to_frame('age_cutoff'))
+    df = df[df['age_cutoff']].copy()
+    df.drop('age_cutoff', axis=1, inplace=True)
 
     # Restrict to filling years after 1985
     df = df.query('1985 <= bank_year').copy()
@@ -42,22 +43,22 @@ def load_bankrupt_panel(_rebuild_down=False):
 def _flag_bankyear_couple(df):
     """ Create flags for 'is head/wife in filing year """
     df['temp'] = (
-        (df['event_year'] == 0) &
+        (df['year'] == 1996) &
         (df['relhead'] == 'head') &
         (df['sequence_number'] == 1)
     )
-    df['bank_is_head'] = df.groupby(level='person_id',
+    df['head_in_1996'] = df.groupby(level='person_id',
                                     axis=0)['temp'].transform('max')
     # Get 'wife' (not always `sequence_number = 2`, but wife is unique w/in
     # `interview_number` up to a couple coding errors that should be outside
     # the sample)
     df['temp'] = (
-        (df['event_year'] == 0) &
+        (df['year'] == 1996) &
         (df['relhead'] == 'wife') &
         ((df['sequence_number'] <= 10) |    # In the family
          (df['sequence_number'] == 51))     # or 'institutionalized'
     )
-    df['bank_is_wife'] = df.groupby(level='person_id',
+    df['wife_in_1996'] = df.groupby(level='person_id',
                                     axis=0)['temp'].transform('max')
     df.drop('temp', axis=1, inplace=True)
 
@@ -66,20 +67,32 @@ def _flag_bankyear_couple(df):
 
 def uniform_cleaning(_rebuild_down=False):
     """ Basic cleaning for both bankrupt and non-bankrupt panels """
-    df = load_full_panel(_rebuild=_rebuild_down).reset_index()
+    df = load_full_panel(_rebuild=_rebuild_down)
+
+    # Fill in birth year and age
+    yob = _get_yob(df)
+    df = df.drop('yearbirth', axis=1)
+    df = df.join(yob.to_frame('yearbirth'))
+    df = df.reset_index('year')
+    df['age'] = np.where(df['age'].notnull(),
+                         df['age'],
+                         df['year'] - df['yearbirth'])
+
+    df = df.reset_index()
 
     # # Restrict sample
+    # Drop if age is missing
+    df = df[df['age'].notnull()].copy()
     # Drop if person not interviewed in this year
     df = df.query('sequence_number != 0').copy()
     # Drop if Don't Know whether filed (all other bank vars are missing)
     df = df[df['bank_filed'].notnull()].copy()
-    # Drop if not actually in the sample (by seq_num)
-    df = df[df['sequence_number'] < 70].copy()
 
     # # Create variables
     #   Current-year `head` and `spouse`
     df['head'] = (df['relhead'] == 'head') & (df['sequence_number'] == 1)
     df['spouse'] = (df['relhead'] == 'wife')
+    df['is_adult_now'] = df['head'] | df['spouse']
     #   Unemployed
     df['unemployed'] = (df['employ'] == 'unemployed').astype(int)
     emp_miss = df['employ'] == ''
@@ -100,7 +113,21 @@ def uniform_cleaning(_rebuild_down=False):
     df['divorced'] = (df['mrstat'] == 'd').astype(int)
     df.loc[df['mrstat'].isnull(), ['married', 'divorced']] = np.nan
 
+    df = df.drop('index', axis=1)
+
     return df.set_index('person_id')
+
+def _get_yob(df):
+    yob_1996 = df.loc[pd.IndexSlice[:, 1996], 'yearbirth']
+    yob_1996.index = yob_1996.index.droplevel('year')
+    yob_mode = df.groupby(
+        level='person_id')['yearbirth'].apply(lambda x: x.mode().squeeze())
+    yob_mode[yob_mode.apply(lambda x: type(x) is not np.float64)] = np.nan
+    yob = yob_1996.to_frame('yob').join(yob_mode.to_frame('mode'))
+    yob['yearbirth'] = np.where(yob['yob'].notnull(), yob['yob'], yob['mode'])
+
+    yob['yearbirth'] = yob['yearbirth'].astype(np.float64)
+    return yob['yearbirth'].copy()
 
 
 if __name__ == '__main__':
