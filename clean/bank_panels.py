@@ -151,7 +151,7 @@ def _flag_1996_couple(df):
         (df['relhead'] == 'head') &
         (df['sequence_number'] == 1)
     )
-    df['head_in_1996'] = df.groupby(level='person_id',
+    df['head_in_1996'] = df.groupby('person_id',
                                     axis=0)['temp'].transform('max')
     # Get 'wife' (not always `sequence_number = 2`, but wife is unique w/in
     # `interview_number` up to a couple coding errors that should be outside
@@ -162,7 +162,7 @@ def _flag_1996_couple(df):
         ((df['sequence_number'] <= 10) |    # In the family
          (df['sequence_number'] == 51))     # or 'institutionalized'
     )
-    df['wife_in_1996'] = df.groupby(level='person_id',
+    df['wife_in_1996'] = df.groupby('person_id',
                                     axis=0)['temp'].transform('max')
     df.drop('temp', axis=1, inplace=True)
 
