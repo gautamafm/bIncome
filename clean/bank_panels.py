@@ -25,20 +25,33 @@ def load_bankrupt_panel(_rebuild_down=False):
 
     df['event_year'] = df['year'] - df['bank_year']
 
-    # Restrict to "head or wife in year of bankruptcy"
+    # Restrict to filling years after 1985
+    df = df[df['event_year'].notnull()].copy()
+    df = df[df['bank_year'] >= 1985].copy()
+
+    # Restrict to "head or wife in 1996 (year of reporting)"
     df = _flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
     df = df[df[['head_in_1996', 'wife_in_1996']].max(axis=1)].copy()
 
-    # Restrict to "age>28 at bankruptcy"
-    age_cutoff = df.loc[df['event_year'] == 0, 'age'] >= 24
-    df = df.join(age_cutoff.to_frame('age_cutoff'))
-    df = df[df['age_cutoff']].copy()
-    df.drop('age_cutoff', axis=1, inplace=True)
+    # Drop if we don't observe you before you file
+    income_obs = df[df['tot_fam_income'].notnull()].copy()
+    min_es_year = income_obs.groupby(level='person_id')['event_year'].min()
+    df = df.join(min_es_year.to_frame('min_es_year'))
+    df['min_es_year'] = df['min_es_year'].fillna(99)
+    df = df[df['min_es_year'] <= - 1].copy()
+    df = df.drop('min_es_year', axis=1)
 
-    # Restrict to filling years after 1985
-    df = df.query('1985 <= bank_year').copy()
+    # Restrict to "age>28 at bankruptcy"
+    df['tmp'] = False
+    criteria = (df['event_year'] == 0) & (df['age'] >= 24)
+    df.loc[criteria, 'tmp'] = True
+    cutoff = df.groupby(level='person_id')['tmp'].max()
+    df = df.join(cutoff.to_frame('age_cutoff'))
+    df = df[df['age_cutoff']].copy()
+    df = df.drop(['tmp', 'age_cutoff'], axis=1)
 
     return df
+
 
 def _flag_bankyear_couple(df):
     """ Create flags for 'is head/wife in filing year """
@@ -68,6 +81,10 @@ def _flag_bankyear_couple(df):
 def uniform_cleaning(_rebuild_down=False):
     """ Basic cleaning for both bankrupt and non-bankrupt panels """
     df = load_full_panel(_rebuild=_rebuild_down)
+
+    # Drop if filed but don't know year
+    drop_me = (df['bank_filed'] == 1) & (df['bank_year'].isnull())
+    df = df[~drop_me].copy()
 
     # # Fill in missing data
     # Fill in birth year and age
@@ -133,10 +150,10 @@ def uniform_cleaning(_rebuild_down=False):
     df['divorced'] = (df['mrstat'] == 'd').astype(int)
     df.loc[df['mrstat'].isnull(), ['married', 'divorced']] = np.nan
 
+    df = df.reset_index()
+
     if 'index' in df.columns:
         df = df.drop('index', axis=1)
-
-    df = df.reset_index()
 
     return df.set_index('person_id')
 
