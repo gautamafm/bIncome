@@ -29,10 +29,6 @@ def load_bankrupt_panel(_rebuild_down=False):
     df = df[df['event_year'].notnull()].copy()
     df = df[df['bank_year'] >= 1985].copy()
 
-    # Restrict to "head or wife in 1996 (year of reporting)"
-    df = _flag_bankyear_couple(df)    # Creates vars `bank_is_head[wife]`
-    df = df[df[['head_in_1996', 'wife_in_1996']].max(axis=1)].copy()
-
     # Drop if we don't observe you before you file
     income_obs = df[df['tot_fam_income'].notnull()].copy()
     min_es_year = income_obs.groupby(level='person_id')['event_year'].min()
@@ -49,31 +45,6 @@ def load_bankrupt_panel(_rebuild_down=False):
     df = df.join(cutoff.to_frame('age_cutoff'))
     df = df[df['age_cutoff']].copy()
     df = df.drop(['tmp', 'age_cutoff'], axis=1)
-
-    return df
-
-
-def _flag_bankyear_couple(df):
-    """ Create flags for 'is head/wife in filing year """
-    df['temp'] = (
-        (df['year'] == 1996) &
-        (df['relhead'] == 'head') &
-        (df['sequence_number'] == 1)
-    )
-    df['head_in_1996'] = df.groupby(level='person_id',
-                                    axis=0)['temp'].transform('max')
-    # Get 'wife' (not always `sequence_number = 2`, but wife is unique w/in
-    # `interview_number` up to a couple coding errors that should be outside
-    # the sample)
-    df['temp'] = (
-        (df['year'] == 1996) &
-        (df['relhead'] == 'wife') &
-        ((df['sequence_number'] <= 10) |    # In the family
-         (df['sequence_number'] == 51))     # or 'institutionalized'
-    )
-    df['wife_in_1996'] = df.groupby(level='person_id',
-                                    axis=0)['temp'].transform('max')
-    df.drop('temp', axis=1, inplace=True)
 
     return df
 
@@ -155,6 +126,10 @@ def uniform_cleaning(_rebuild_down=False):
     if 'index' in df.columns:
         df = df.drop('index', axis=1)
 
+    # Restrict to "head or wife in 1996 (year of reporting)"
+    df = _flag_1996_couple(df)    # Creates vars `bank_is_head[wife]`
+    df = df[df[['head_in_1996', 'wife_in_1996']].max(axis=1)].copy()
+
     return df.set_index('person_id')
 
 def _get_yob(df):
@@ -168,6 +143,30 @@ def _get_yob(df):
 
     yob['yearbirth'] = yob['yearbirth'].astype(np.float64)
     return yob['yearbirth'].copy()
+
+def _flag_1996_couple(df):
+    """ Create flags for 'is head/wife in filing year """
+    df['temp'] = (
+        (df['year'] == 1996) &
+        (df['relhead'] == 'head') &
+        (df['sequence_number'] == 1)
+    )
+    df['head_in_1996'] = df.groupby(level='person_id',
+                                    axis=0)['temp'].transform('max')
+    # Get 'wife' (not always `sequence_number = 2`, but wife is unique w/in
+    # `interview_number` up to a couple coding errors that should be outside
+    # the sample)
+    df['temp'] = (
+        (df['year'] == 1996) &
+        (df['relhead'] == 'wife') &
+        ((df['sequence_number'] <= 10) |    # In the family
+         (df['sequence_number'] == 51))     # or 'institutionalized'
+    )
+    df['wife_in_1996'] = df.groupby(level='person_id',
+                                    axis=0)['temp'].transform('max')
+    df.drop('temp', axis=1, inplace=True)
+
+    return df
 
 
 if __name__ == '__main__':
